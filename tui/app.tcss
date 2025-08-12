@@ -1,0 +1,29 @@
+RichLog {
+    width: 100%;
+    height: 1fr;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: black;
+    scrollbar-size: 0 1;
+    scrollbar-color: #541A1A;
+    scrollbar-color-hover: #6E2121;
+    scrollbar-color-active: #6E2121;
+}
+
+Input {
+    width: 100%;
+    height: auto;
+    padding: 1;
+    margin: 0;
+    border: none;
+}
+
+Vertical {
+    align: center middle;
+    content-align: center middle;
+    height: 100%;
+    width: 100%;
+    border: round #541A1A;
+    margin-left: 1;
+}

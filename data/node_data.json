@@ -1,0 +1,84 @@
+[
+  {
+    "id": "12",
+    "name": "Glyph.Flow",
+    "type": "Project",
+    "created_at": "2025-08-11",
+    "deadline": "",
+    "short_desc": "TUI workflow manager",
+    "full_desc": "",
+    "completed": false,
+    "children": [
+      {
+        "id": "12.01",
+        "name": "Planning",
+        "type": "Phase",
+        "created_at": "2025-08-11",
+        "deadline": "",
+        "short_desc": "Design and requirements",
+        "full_desc": "",
+        "completed": false,
+        "children": [
+          {
+            "id": "12.01.01",
+            "name": "Define structure",
+            "type": "Task",
+            "created_at": "2025-08-11",
+            "deadline": "",
+            "short_desc": "Decide on Node model",
+            "full_desc": "",
+            "completed": false,
+            "children": [
+              {
+                "id": "12.01.01.01",
+                "name": "Add progress support",
+                "type": "Subtask",
+                "created_at": "2025-08-11",
+                "deadline": "",
+                "short_desc": "Progress calculation logic",
+                "full_desc": "",
+                "completed": false,
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "12.02",
+        "name": "Implementation",
+        "type": "Phase",
+        "created_at": "2025-08-11",
+        "deadline": "",
+        "short_desc": "Code the core system",
+        "full_desc": "",
+        "completed": false,
+        "children": [
+          {
+            "id": "12.02.01",
+            "name": "Write save/load",
+            "type": "Task",
+            "created_at": "2025-08-11",
+            "deadline": "",
+            "short_desc": "Create JSON I/O",
+            "full_desc": "",
+            "completed": false,
+            "children": [
+              {
+                "id": "12.02.01.01",
+                "name": "Test with sample data",
+                "type": "Subtask",
+                "created_at": "2025-08-11",
+                "deadline": "",
+                "short_desc": "Load from file and inspect",
+                "full_desc": "",
+                "completed": false,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
