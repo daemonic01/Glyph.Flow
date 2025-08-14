@@ -1,0 +1,74 @@
+[white]Entries are identified by segmented IDs. Each internal level has an ID that is one segment longer. (00, 00.00, 00.00.00, etc.)
+[white]By default, there are 4 levels available: Project, Phase, Task, and Subtask.
+[white]Every command that requires a specific entry uses its ID.\n
+
+
+[bold cyan]Available Commands:\n
+
+[bold]🛠 Structure
+[bold white]  create <type> <name> [--desc] [--full] [--deadline] [--parent <id>]
+    Create a new node (Project, Phase, Task, Subtask)
+[dim]    Example: create Task "Fix Logic" --desc "Bugfix" --parent 01.02\n
+
+[bold white]  edit <id> [--name] [--desc] [--full] [--deadline]
+    Edit an existing node's name, descriptions, or deadline
+[dim]    Example: edit 01.02 --name "New Name" --desc "Short" --full "Detailed" --deadline 2025-08-15\n
+
+[bold white]  delete <id>
+    Schedule deletion of a node (requires confirm)
+[dim]    Example: delete 01.01\n
+
+[bold white]  confirm delete <id>
+    Confirm a previously requested deletion\n
+
+[bold white]  abort delete
+    Cancel a pending deletion\n
+
+[bold white]  schema <type1> <type2> ...
+    Change hierarchy schema
+[dim]    Example: schema Level1 Level2 Level3   Default: Project Phase Task Subtask
+[white]    Changing the schema with existing data is only possible if the length of the new schema specified is the same as the old one.\n
+
+[bold white]  toggle <id>
+    Toggle a node and all its children between done/undone
+[dim]    Example: toggle 01.02\n
+
+[bold]🔍 Search
+[bold white]  search <substring>
+    Search nodes by name (case-insensitive)
+[bold white]  search name <substring>
+    Explicit name search
+[bold white]  search id <prefix>
+    Search by exact or prefix ID
+[dim]    Example: search plan\n
+
+[bold]📄 Display
+[bold white]  ls           List root nodes
+[bold white]  tree         Print full tree view (indented format)
+[bold white]  ascii        ASCII-style tree branches
+[bold white]  table        Tabular view of all nodes
+[bold white]  clear        Clear the log\n
+
+[bold]💾 File I/O
+[bold white]  save         Save to 'node_data.json'
+[bold white]  load         Load from 'node_data.json'
+[bold white]  sample       Generate a sample node tree\n
+
+[bold]🧹 Bulk Operations
+[bold white]  clearall mem
+    Clear all in-memory nodes (requires confirmation)
+[bold white]  clearall file
+    Delete saved data file (requires confirmation)
+[bold white]  clearall both
+    Clear memory and delete file (requires confirmation)
+[bold white]  abort clearall
+    Cancel a pending clearall operation\n
+
+[bold]🧪 Misc
+[bold white]  help         Show this help message\n
+
+[bold]🚪 Exit
+[bold white]  q / quit     Exit the application\n
+
+Automatic saving and loading is not yet part of the functionality. Use the 'save' and 'load' commands.
+Use the 'sample' command to create sample data, then view the result with one of the display commands.\n

@@ -45,6 +45,25 @@ create Task "Fix Logic" --desc "Bugfix" --parent 01.02
 
 ---
 
+### `edit <id> [--name ...] [--desc ...] [--full ...] [--deadline ...]`
+
+Edit an existing node's attributes.
+
+- `<id>`: ID of the node to edit
+- Optional flags:
+  - `--name`: Change the node name
+  - `--desc`: Change the short description
+  - `--full`: Change the full description
+  - `--deadline`: Set a new deadline
+
+**Example:**
+
+```bash
+edit 01.02 --name "New Name" --desc "Short" --full "Detailed" --deadline 2025-08-15
+```
+
+---
+
 ### `delete <id>`
 
 Schedules a node for deletion. Requires confirmation.
@@ -94,6 +113,29 @@ toggle 01.02
 
 ---
 
+## 🔍 Search Commands
+
+### `search <substring>`
+
+Search nodes by name (case-insensitive).
+
+### `search name <substring>`
+
+Explicitly search nodes by name.
+
+### `search id <prefix>`
+
+Search by exact ID or by prefix (returns matching descendants).
+
+**Example:**
+
+```bash
+search plan
+search id 01.02
+```
+
+---
+
 ## 📄 Display Commands
 
 ### `ls`
@@ -132,6 +174,26 @@ Loads the node tree from `node_data.json`
 ### `sample`
 
 Generates a pre-filled sample tree to experiment with.
+
+---
+
+## 🧹 Bulk Operations
+
+### `clearall mem`
+
+Clears all in-memory nodes. Requires confirmation.
+
+### `clearall file`
+
+Deletes the saved data file. Requires confirmation.
+
+### `clearall both`
+
+Clears memory and deletes the saved data file. Requires confirmation.
+
+### `abort clearall`
+
+Cancels a pending clearall operation.
 
 ---
 

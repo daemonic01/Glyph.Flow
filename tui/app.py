@@ -188,6 +188,31 @@ class NodeTestApp(App):
             )
             self.pending_confirm = ("delete", target)
 
+        elif cmd.startswith("clearall"):
+            parts = shlex.split(cmd)
+
+            if len(parts) >= 2 and parts[1] == "--help":
+                self.log_widget.write("[cyan]Usage:")
+                self.log_widget.write("  clearall mem    # Clear all nodes from memory")
+                self.log_widget.write("  clearall file   # Delete saved data file (node_data.json)")
+                self.log_widget.write("  clearall both   # Clear memory and delete file")
+                return
+
+            if len(parts) < 2 or parts[1] not in ("mem", "file", "both"):
+                self.log_widget.write("[red]Usage: clearall <mem|file|both>")
+                return
+
+            action = parts[1]
+
+            # Confirmation stage
+            if not self.pending_confirm:
+                self.log_widget.write(
+                    f"[yellow]Are you sure you want to clear '{action}'? "
+                    f"Type: 'confirm clearall {action}' or 'abort clearall' to cancel."
+                )
+                self.pending_confirm = ("clearall", action)
+                return
+
         elif cmd.startswith("confirm"):
             parts = shlex.split(cmd)
             if len(parts) < 3:
@@ -212,21 +237,61 @@ class NodeTestApp(App):
 
                 self.pending_confirm = None
 
+
+            if self.pending_confirm and self.pending_confirm[0] == "clearall":
+                from core.data_io import delete_data_file
+                target = self.pending_confirm[1]
+
+                if target == "mem":
+                    self.nodes.clear()
+                    self.log_widget.write("[green]All in-memory nodes cleared.")
+                elif target == "file":
+                    deleted = delete_data_file()
+                    if deleted:
+                        self.log_widget.write("[green]Data file deleted.")
+                    else:
+                        self.log_widget.write("[yellow]No data file found to delete.")
+                elif target == "both":
+                    self.nodes.clear()
+                    deleted = delete_data_file()
+                    msg = "[green]Memory cleared. " + ("Data file deleted." if deleted else "No data file found.")
+                    self.log_widget.write(msg)
+
+                self.pending_confirm = None
+                return
+            
             else:
-                self.log_widget.write("[red]No delete operation pending confirmation.")
+                self.log_widget.write("[red]No pending confirmation.")
+
+
 
         elif cmd.startswith("abort"):
             parts = shlex.split(cmd)
             if len(parts) < 2:
-                self.log_widget.write("[red]Usage: abort delete")
+                self.log_widget.write("[red]Usage: abort <delete|clearall>")
                 return
 
             action = parts[1]
-            if action == "delete" and self.pending_confirm and self.pending_confirm[0] == "delete":
-                self.log_widget.write(f"[cyan]Delete of '{self.pending_confirm[1].name}' aborted.")
-                self.pending_confirm = None
+
+            if action == "delete":
+                if self.pending_confirm and self.pending_confirm[0] == "delete":
+                    self.log_widget.write(f"[cyan]Delete of '{self.pending_confirm[1].name}' aborted.")
+                    self.pending_confirm = None
+                else:
+                    self.log_widget.write("[yellow]No delete operation to abort.")
+
+            elif action == "clearall":
+                if self.pending_confirm and self.pending_confirm[0] == "clearall":
+                    target = self.pending_confirm[1]  # string: mem/file/both
+                    self.log_widget.write(f"[cyan]Clearall '{target}' aborted.")
+                    self.pending_confirm = None
+                else:
+                    self.log_widget.write("[yellow]No clearall operation to abort.")
+
             else:
-                self.log_widget.write("[yellow]No delete operation to abort.")
+                self.log_widget.write(f"[red]Unknown abort target: {action}")
+
+
 
 
         elif cmd.startswith("toggle"):
@@ -249,58 +314,110 @@ class NodeTestApp(App):
             self.log_widget.write(f"[green]Toggled '{target.name}' and all descendants from {old_status} to {new_status}.")
 
 
+
+        elif cmd.startswith("edit"):
+            try:
+                parts = shlex.split(cmd)
+
+                if len(parts) >= 2 and parts[1] == "--help":
+                    self.log_widget.write("[cyan]Usage:")
+                    self.log_widget.write("  edit <id> [--name \"...\"] [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD]")
+                    self.log_widget.write("Example:")
+                    self.log_widget.write("  edit 01.02 --name \"New Name\" --desc \"Short\" --full \"Detailed\" --deadline 2025-08-15")
+                    return
+
+                from core.parser import parse_edit_args
+                args = parse_edit_args(parts)
+
+                node = self.find_node_by_id(args["id"])
+                if not node:
+                    self.log_widget.write(f"[red]Node with ID '{args['id']}' not found.")
+                    return
+
+                changes = []
+                if args["name"]:
+                    node.name = args["name"]
+                    changes.append(f"name → '{args['name']}'")
+                if args["short_desc"]:
+                    node.short_desc = args["short_desc"]
+                    changes.append(f"short_desc → '{args['short_desc']}'")
+                if args["full_desc"]:
+                    node.full_desc = args["full_desc"]
+                    changes.append(f"full_desc → '{args['full_desc']}'")
+                if args["deadline"]:
+                    node.deadline = args["deadline"]
+                    changes.append(f"deadline → {args['deadline']}")
+
+                if changes:
+                    self.log_widget.write(f"[green]Updated node {node.id}: " + ", ".join(changes))
+                else:
+                    self.log_widget.write(f"[yellow]No changes made to node {node.id}.")
+
+            except Exception as e:
+                self.log_widget.write(f"[red]Error: {e}")
+
+        
+
+        elif cmd.startswith("search"):
+            try:
+                parts = shlex.split(cmd)
+
+                if len(parts) >= 2 and parts[1] == "--help":
+                    self.log_widget.write("[cyan]Usage:")
+                    self.log_widget.write("  search <substring>")
+                    self.log_widget.write("  search name <substring>")
+                    self.log_widget.write("  search id <prefix-or-exact>")
+                    return
+
+                from core.parser import parse_search_args
+                args = parse_search_args(parts)
+
+                matches = []
+                if args["mode"] == "id":
+                    q = args["query"]
+                    for n in self.iter_nodes():
+                        if n.id == q or n.id.startswith(q):
+                            matches.append(n)
+                else:  # name
+                    q = args["query"].lower()
+                    for n in self.iter_nodes():
+                        if q in n.name.lower():
+                            matches.append(n)
+
+                if not matches:
+                    if not self.nodes:
+                        self.log_widget.write("[yellow]No data loaded.")
+                        return
+                    else:
+                        self.log_widget.write("[yellow]No matches.")
+                        return
+
+                from rich.table import Table
+                table = Table(show_header=True, header_style="bold cyan")
+                table.add_column("ID", style="bold", width=12)
+                table.add_column("Name", style="white")
+                table.add_column("Type", style="cyan", width=10)
+                table.add_column("Ready", style="green", width=6)
+                table.add_column("Deadline", style="white", width=12)
+
+                for n in matches:
+                    ready = "[X]" if n.completed else "[ ]"
+                    deadline = n.deadline if n.deadline else "-"
+                    table.add_row(n.id, n.name, n.type, ready, deadline)
+
+                self.log_widget.write(f"[bold cyan]Search results ({len(matches)}):")
+                self.log_widget.write(table)
+
+            except Exception as e:
+                self.log_widget.write(f"[red]Error: {e}")
+
+
+
+
         elif cmd == "help":
-            self.log_widget.write("[white]Entries are identified by segmented IDs. Each internal level has an ID that is one segment longer. (00, 00.00, 00.00.00, etc.)")
-            self.log_widget.write("[white]By default, there are 4 levels available: Project, Phase, Task, and Subtask.")
-            self.log_widget.write("[white]Every command that requires a specific entry uses its ID.\n")
-
-
-            self.log_widget.write("[bold cyan]Available Commands:\n")
-
-            self.log_widget.write("[bold]🛠 Structure")
-            self.log_widget.write("[bold white]  create <type> <name> [--desc] [--full] [--deadline] [--parent <id>]")
-            self.log_widget.write("    Create a new node (Project, Phase, Task, Subtask)")
-            self.log_widget.write("[dim]    Example: create Task \"Fix Logic\" --desc \"Bugfix\" --parent 01.02\n")
-
-            self.log_widget.write("[bold white]  delete <id>")
-            self.log_widget.write("    Schedule deletion of a node (requires confirm)")
-            self.log_widget.write("[dim]    Example: delete 01.01\n")
-
-            self.log_widget.write("[bold white]  confirm delete <id>")
-            self.log_widget.write("    Confirm a previously requested deletion\n")
-
-            self.log_widget.write("[bold white]  abort delete")
-            self.log_widget.write("    Cancel a pending deletion\n")
-
-            self.log_widget.write("[bold white]  schema <type1> <type2> ...")
-            self.log_widget.write("    Change hierarchy schema")
-            self.log_widget.write("[dim]    Example: schema Level1 Level2 Level3   Default: Project Phase Task Subtask")
-            self.log_widget.write("[white]    Changing the schema with existing data is only possible if the length of the new schema specified is the same as the old one.\n")
-
-            self.log_widget.write("[bold white]  toggle <id>")
-            self.log_widget.write("    Toggle a node and all its children between done/undone")
-            self.log_widget.write("[dim]    Example: toggle 01.02\n")
-
-            self.log_widget.write("[bold]📄 Display")
-            self.log_widget.write("[bold white]  ls           List root nodes")
-            self.log_widget.write("[bold white]  tree         Print full tree view (indented format)")
-            self.log_widget.write("[bold white]  ascii        ASCII-style tree branches")
-            self.log_widget.write("[bold white]  table        Tabular view of all nodes")
-            self.log_widget.write("[bold white]  clear        Clear the log\n")
-
-            self.log_widget.write("[bold]💾 File I/O")
-            self.log_widget.write("[bold white]  save         Save to 'node_data.json'")
-            self.log_widget.write("[bold white]  load         Load from 'node_data.json'")
-            self.log_widget.write("[bold white]  sample       Generate a sample node tree\n")
-
-            self.log_widget.write("[bold]🧪 Misc")
-            self.log_widget.write("[bold white]  help         Show this help message\n")
-
-            self.log_widget.write("[bold]🚪 Exit")
-            self.log_widget.write("[bold white]  q / quit     Exit the application\n")
-
-            self.log_widget.write("Automatic saving and loading is not yet part of the functionality. Use the 'save' and 'load' commands.")
-            self.log_widget.write("Use the 'sample' command to create sample data, then view the result with one of the display commands.\n")
+            from core.data_io import load_help_text
+            for line in load_help_text():
+                self.log_widget.write(line)
 
         else:
             self.log_widget.write(f"[red]Unknown command: {cmd}")
@@ -388,7 +505,7 @@ class NodeTestApp(App):
         for root in self.nodes:
             self._add_node_to_table(root, table)
 
-        self.log_widget.write("[bold cyan]Táblázatos nézet:")
+        self.log_widget.write("[bold cyan]Table view:")
         self.log_widget.write(table)
 
     def _add_node_to_table(self, node: Node, table):
@@ -406,3 +523,14 @@ class NodeTestApp(App):
         )
         for child in node.children:
             self._add_node_to_table(child, table)
+
+
+    def iter_nodes(self):
+        """Helper function for iterating through nodes recursively."""
+        for root in self.nodes:
+            yield from self._iter_nodes_recursive(root)
+
+    def _iter_nodes_recursive(self, node):
+        yield node
+        for child in node.children:
+            yield from self._iter_nodes_recursive(child)

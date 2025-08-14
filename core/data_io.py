@@ -74,3 +74,20 @@ def create_sample_tree() -> List[Node]:
 
     return [project]
 
+
+
+def delete_data_file(filename: str = str(DATA_PATH)) -> bool:
+    """Delete the node data file if it exists. Returns True if deleted."""
+    if os.path.exists(filename):
+        os.remove(filename)
+        return True
+    return False
+
+
+
+HELP_PATH = Path(__file__).resolve().parent.parent / "assets" / "help.txt"
+
+def load_help_text() -> list[str]:
+    """Load data.txt for help command."""
+    with open(HELP_PATH, "r", encoding="utf-8") as f:
+        return [line.rstrip("\n") for line in f]
