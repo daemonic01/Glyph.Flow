@@ -2,7 +2,26 @@
 
 ---
 
-## [v0.1.0a2] – 2025-08-14
+## [v0.1.0a3] – 2025-08-16
+
+### ✨ Added
+- Added autosave feature and `autosave <on/off>` command.
+- Added `config.json` to store settings and basic information.
+- Added `content_styler.py` for unified log message formatting (INFO, WARN, ERROR, SUCCESS).  
+  Preparing to support localized messaging
+
+### 🔧 Improved
+- The first message now displays the version number and the status of the autosave setting.
+- All log outputs now use consistent formatting instead of inline Rich markup.
+
+### 🐛 Known Limitations
+- No undo/redo system
+- No system message buffer/logging
+- No localized messaging system.
+- Manual command input only – no TUI or keybindings yet
+- No export/import feature.
+
+---
 
 ### ✨ Added
 - `edit` command to modify existing nodes (name, short/full description, deadline) via flags.

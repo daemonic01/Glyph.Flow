@@ -67,6 +67,9 @@
 [bold]🧪 Misc
 [bold white]  help         Show this help message\n
 
+[bold]⚙️ Config
+[bold white]  autosave <on/off>         Turn auto-save on and off.
+
 [bold]🚪 Exit
 [bold white]  q / quit     Exit the application\n
 

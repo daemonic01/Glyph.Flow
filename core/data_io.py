@@ -3,9 +3,11 @@ import json
 import os
 from typing import List
 from .node import Node
+from core.config_loader import load_config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_PATH = BASE_DIR / "data" / "node_data.json"
+config = load_config()
+DATA_PATH = BASE_DIR / config["paths"]["data"]
 
 
 def save_node_tree(root_nodes: List[Node], filename: str = str(DATA_PATH)):
@@ -85,7 +87,7 @@ def delete_data_file(filename: str = str(DATA_PATH)) -> bool:
 
 
 
-HELP_PATH = Path(__file__).resolve().parent.parent / "assets" / "help.txt"
+HELP_PATH = BASE_DIR / config["paths"]["help"]
 
 def load_help_text() -> list[str]:
     """Load data.txt for help command."""

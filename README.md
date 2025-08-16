@@ -96,6 +96,9 @@ Use the input field to enter commands (see below).
 - `clearall both`                 – Clear memory and delete file (requires confirmation)
 - `abort clearall`                – Cancel pending `clearall`
 
+#### Config Operations
+- `autosave <on/off>`             - Turn auto-save on and off.
+
 ---
 
 ### 💡 Usage examples
@@ -110,7 +113,13 @@ Use the input field to enter commands (see below).
 
 ## 📜 Version History
 
-### v0.1.0a2 – 2025-08-13
+### v0.1.0a3 – 2025-08-16
+- Added autosave feature and `autosave` command.
+- Added `config.json` to store settings and basic information.
+- Added `content_styler.py` for unified log message formatting (INFO, WARN, ERROR, SUCCESS).  
+  Preparing to support localized messaging
+
+### v0.1.0a2 – 2025-08-14
 - Added `edit`, `search`, and `clearall` commands
 - External help text loading
 - Improved command parsing and confirmation system

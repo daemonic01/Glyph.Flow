@@ -4,7 +4,7 @@ RichLog {
     padding: 0;
     margin: 0;
     border: none;
-    background: black;
+    background: $panel 10%;
     scrollbar-size: 0 1;
     scrollbar-color: #541A1A;
     scrollbar-color-hover: #6E2121;

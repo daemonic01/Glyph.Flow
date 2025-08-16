@@ -1,4 +1,4 @@
-from tui.app import NodeTestApp
+from tui.app import GlyphApp
 
 if __name__ == "__main__":
-    NodeTestApp().run()
+    GlyphApp().run()

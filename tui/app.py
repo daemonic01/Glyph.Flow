@@ -9,9 +9,12 @@ import shlex
 from core.schema import NodeSchema
 from core.parser import parse_create_args
 from core.utils import toggle_all
+from core.config_loader import load_config, save_config
+from core.content_styler import format_info, format_warn, format_error, format_success
 
 
-class NodeTestApp(App):
+class GlyphApp(App):
+    config = load_config()
     CSS_PATH = "app.tcss"
     BINDINGS = [
         ("q", "quit", "Quit")
@@ -28,399 +31,440 @@ class NodeTestApp(App):
 
 
     def on_mount(self):
-        self.log_widget.write("[bold green]Node test environment initialized.")
+        self.log_widget.write(f"[green]Node test environment initialized. Active version: {self.config["version"]} | Autosave: {"ON" if self.config["autosave"] else "OFF"}")
         self.log_widget.write("Type 'help' to see all commands. Type 'sample' to generate a demo tree.")
         self.input.focus()
 
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle command input from the user and execute corresponding actions."""
+        self.mutated = False
         cmd = event.value.strip()
         self.input.value = ""
         self.log_widget.write(f"[bold magenta]> {cmd}")
 
-        if cmd == "q" or cmd == "quit":
-            self.exit()
+        try:
+            if cmd == "q" or cmd == "quit":
+                self.exit()
 
-        elif cmd == "sample":
-            self.nodes = create_sample_tree()
-            self.log_widget.write("[green]Sample tree created.")
+            elif cmd == "sample":
+                self.nodes = create_sample_tree()
+                self.log_widget.write(format_success("Sample tree created."))
+                self.mutated = True
 
-        elif cmd == "save":
-            save_node_tree(self.nodes)
-            self.log_widget.write("[green]Data saved to 'node_data.json'.")
+            elif cmd == "save":
+                save_node_tree(self.nodes)
+                self.log_widget.write(format_success("Data saved to 'node_data.json'."))
 
-        elif cmd == "load":
-            self.nodes = load_node_tree()
-            self.log_widget.write("[green]Data loaded from 'node_data.json'.")
+            elif cmd == "load":
+                self.nodes = load_node_tree()
+                self.log_widget.write(format_success("Data loaded from 'node_data.json'."))
 
-        elif cmd == "ls":
-            if not self.nodes:
-                self.log_widget.write("[yellow]No data loaded.")
-            else:
-                self.log_widget.write("[bold cyan]Root nodes:")
-                for n in self.nodes:
-                    self.log_widget.write(f"[white]- {n.name} ({n.type}, ID = {n.id})")
+            elif cmd == "ls":
+                if not self.nodes:
+                    self.log_widget.write(format_warn("No data loaded."))
+                else:
+                    self.log_widget.write("[bold cyan]Root nodes:")
+                    for n in self.nodes:
+                        self.log_widget.write(f"[white]- {n.name} ({n.type}, ID = {n.id})")
 
-        elif cmd == "tree":
-            if not self.nodes:
-                self.log_widget.write("[yellow]No data loaded.")
-            else:
-                self.log_widget.write("[bold cyan]Tree view:")
-                for n in self.nodes:
-                    await self.print_node_recursive(n)
+            elif cmd == "tree":
+                if not self.nodes:
+                    self.log_widget.write(format_warn("No data loaded."))
+                else:
+                    self.log_widget.write("[bold cyan]Tree view:")
+                    for n in self.nodes:
+                        await self.print_node_recursive(n)
+            
+            elif cmd == "ascii":
+                if not self.nodes:
+                    self.log_widget.write(format_warn("No data loaded."))
+                else:
+                    self.log_widget.write("[bold cyan]ASCII Tree View:")
+                    for i, root in enumerate(self.nodes):
+                        self.log_widget.write(f"[#2B9995]{root.name} ({root.type}, ID = {root.id})")
+                        for j, child in enumerate(root.children):
+                            is_last = (j == len(root.children) - 1)
+                            await self.print_ascii_tree(child, "", is_last)
+
+            elif cmd == "table":
+                if not self.nodes:
+                    self.log_widget.write(format_warn("No data loaded."))
+                else:
+                    self.render_table_view()
+            
+            elif cmd == "clear":
+                self.log_widget.clear()
+
+
+
+            elif cmd.startswith("create"):
+                try:
+                    parts = shlex.split(cmd)
+
+                    if len(parts) >= 2 and parts[1] == "--help":
+                        self.log_widget.write("[cyan]Usage:")
+                        self.log_widget.write("  create <type> <name> [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD] [--parent <id>]")
+                        self.log_widget.write("Example:")
+                        self.log_widget.write("  create Task \"Refactor\" --desc \"Cleanup\" --full \"Split\" --deadline 2025-08-12 --parent 01.01")
+                        return
         
-        elif cmd == "ascii":
-            if not self.nodes:
-                self.log_widget.write("[yellow]No data loaded.")
-            else:
-                self.log_widget.write("[bold cyan]ASCII Tree View:")
-                for i, root in enumerate(self.nodes):
-                    self.log_widget.write(f"[#2B9995]{root.name} ({root.type}, ID = {root.id})")
-                    for j, child in enumerate(root.children):
-                        is_last = (j == len(root.children) - 1)
-                        await self.print_ascii_tree(child, "", is_last)
+                    args = parse_create_args(parts)
 
-        elif cmd == "table":
-            if not self.nodes:
-                self.log_widget.write("[yellow]No data loaded.")
-            else:
-                self.render_table_view()
-        
-        elif cmd == "clear":
-            self.log_widget.clear()
+                    new_node = Node(
+                        name=args["name"],
+                        type=args["type"],
+                        short_desc=args["short_desc"],
+                        full_desc=args["full_desc"],
+                        deadline=args["deadline"]
+                    )
 
+                    if args["parent_id"]:
+                        parent = self.find_node_by_id(args["parent_id"])
+                        if parent:
+                            if not self.schema.is_valid_child(parent, args["type"]):
+                                expected = self.schema.get_expected_child_type(parent)
+                                self.log_widget.write(
+                                    format_error(
+                                    f"Invalid type: cannot create '{args['type']}' under '{parent.type}' "
+                                    f"(expected: '{expected}')"
+                                    ))
+                                return
 
-
-        elif cmd.startswith("create"):
-            try:
-                parts = shlex.split(cmd)
-
-                if len(parts) >= 2 and parts[1] == "--help":
-                    self.log_widget.write("[cyan]Usage:")
-                    self.log_widget.write("  create <type> <name> [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD] [--parent <id>]")
-                    self.log_widget.write("Example:")
-                    self.log_widget.write("  create Task \"Refactor\" --desc \"Cleanup\" --full \"Split\" --deadline 2025-08-12 --parent 01.01")
-                    return
-    
-                args = parse_create_args(parts)
-
-                new_node = Node(
-                    name=args["name"],
-                    type=args["type"],
-                    short_desc=args["short_desc"],
-                    full_desc=args["full_desc"],
-                    deadline=args["deadline"]
-                )
-
-                if args["parent_id"]:
-                    parent = self.find_node_by_id(args["parent_id"])
-                    if parent:
-                        if not self.schema.is_valid_child(parent, args["type"]):
-                            expected = self.schema.get_expected_child_type(parent)
-                            self.log_widget.write(
-                                f"[red]Invalid type: cannot create '{args['type']}' under '{parent.type}' "
-                                f"(expected: '{expected}')"
-                            )
+                            parent.add_child(new_node)
+                            self.log_widget.write(format_success(f"Added '{args['name']}' under {parent.id} → New ID: {new_node.id}"))
+                            self.mutated = True
+                        else:
+                            self.log_widget.write(format_error(f"Parent ID '{args['parent_id']}' not found.)"))
+                    else:
+                        if not self.schema.is_valid_child(None, args["type"]):
+                            expected = self.schema.get_expected_child_type(None)
+                            self.log_widget.write(format_error(f"Root node must be of type '{expected}', not '{args['type']}'"))
                             return
 
-                        parent.add_child(new_node)
-                        self.log_widget.write(f"[green]Added '{args['name']}' under {parent.id} → New ID: {new_node.id}")
-                    else:
-                        self.log_widget.write(f"[red]Parent ID '{args['parent_id']}' not found.")
-                else:
-                    if not self.schema.is_valid_child(None, args["type"]):
-                        expected = self.schema.get_expected_child_type(None)
-                        self.log_widget.write(f"[red]Root node must be of type '{expected}', not '{args['type']}'")
-                        return
+                        self.nodes.append(new_node)
+                        self.log_widget.write(format_success(f"Created root node: {args['name']} → ID: {new_node.id}"))
+                        self.mutated = True
 
-                    self.nodes.append(new_node)
-                    self.log_widget.write(f"[green]Created root node: {args['name']} → ID: {new_node.id}")
-
-            except Exception as e:
-                self.log_widget.write(f"[red]Error: {e}")
+                except Exception as e:
+                    self.log_widget.write(format_warn(f"{e}"))
 
 
 
-        elif cmd.startswith("schema"):
-            parts = shlex.split(cmd)
-            if len(parts) < 2:
-                self.log_widget.write("[red]Usage: schema Project Phase Task Subtask")
-            else:
-                new_hierarchy = parts[1:]
-                if not self.nodes:
-                    self.schema = NodeSchema(new_hierarchy)
-                    self.log_widget.write(f"[cyan]Schema set to: {' > '.join(new_hierarchy)} (no data to update)")
-                else:
-                    try:
-                        for root in self.nodes:
-                            depth = self.schema.validate_tree_depth(root)
-                            if depth != len(new_hierarchy):
-                                self.log_widget.write(
-                                    f"[red]Cannot switch schema: current tree depth = {depth}, new schema = {len(new_hierarchy)}"
-                                )
-                                return
-                            
-                        for root in self.nodes:
-                            NodeSchema(new_hierarchy).relabel_tree_to_match(root)
-
-                        self.schema = NodeSchema(new_hierarchy)
-                        self.log_widget.write(f"[green]Schema switched and node types updated to: {' > '.join(new_hierarchy)}")
-                    except Exception as e:
-                        self.log_widget.write(f"[red]Schema change error: {e}")
-            
-        
-        elif cmd.startswith("delete"):
-            parts = shlex.split(cmd)
-            if len(parts) < 2:
-                self.log_widget.write("[red]Usage: delete <id>")
-                return
-
-            target_id = parts[1]
-            target = self.find_node_by_id(target_id)
-            if not target:
-                self.log_widget.write(f"[red]Node with ID '{target_id}' not found.")
-                return
-
-            self.log_widget.write(
-                f"[yellow]Are you sure you want to delete '{target.name}' (ID: {target.id})?"
-                f" Type: 'confirm delete {target.id}' or 'abort delete' to cancel operation."
-            )
-            self.pending_confirm = ("delete", target)
-
-        elif cmd.startswith("clearall"):
-            parts = shlex.split(cmd)
-
-            if len(parts) >= 2 and parts[1] == "--help":
-                self.log_widget.write("[cyan]Usage:")
-                self.log_widget.write("  clearall mem    # Clear all nodes from memory")
-                self.log_widget.write("  clearall file   # Delete saved data file (node_data.json)")
-                self.log_widget.write("  clearall both   # Clear memory and delete file")
-                return
-
-            if len(parts) < 2 or parts[1] not in ("mem", "file", "both"):
-                self.log_widget.write("[red]Usage: clearall <mem|file|both>")
-                return
-
-            action = parts[1]
-
-            # Confirmation stage
-            if not self.pending_confirm:
-                self.log_widget.write(
-                    f"[yellow]Are you sure you want to clear '{action}'? "
-                    f"Type: 'confirm clearall {action}' or 'abort clearall' to cancel."
-                )
-                self.pending_confirm = ("clearall", action)
-                return
-
-        elif cmd.startswith("confirm"):
-            parts = shlex.split(cmd)
-            if len(parts) < 3:
-                self.log_widget.write("[red]Usage: confirm delete <id>")
-                return
-
-            action = parts[1]
-            target_id = parts[2]
-
-            if self.pending_confirm and self.pending_confirm[0] == "delete":
-                target = self.pending_confirm[1]
-                if target.id != target_id:
-                    self.log_widget.write(f"[red]Mismatched confirmation ID. Pending: {target.id}, got: {target_id}")
-                    return
-
-                if target.parent:
-                    target.parent.children = [c for c in target.parent.children if c.id != target.id]
-                    self.log_widget.write(f"[green]Deleted node '{target.name}' (ID: {target.id}) from parent {target.parent.id}")
-                else:
-                    self.nodes = [n for n in self.nodes if n.id != target.id]
-                    self.log_widget.write(f"[green]Deleted root node '{target.name}' (ID: {target.id})")
-
-                self.pending_confirm = None
-
-
-            if self.pending_confirm and self.pending_confirm[0] == "clearall":
-                from core.data_io import delete_data_file
-                target = self.pending_confirm[1]
-
-                if target == "mem":
-                    self.nodes.clear()
-                    self.log_widget.write("[green]All in-memory nodes cleared.")
-                elif target == "file":
-                    deleted = delete_data_file()
-                    if deleted:
-                        self.log_widget.write("[green]Data file deleted.")
-                    else:
-                        self.log_widget.write("[yellow]No data file found to delete.")
-                elif target == "both":
-                    self.nodes.clear()
-                    deleted = delete_data_file()
-                    msg = "[green]Memory cleared. " + ("Data file deleted." if deleted else "No data file found.")
-                    self.log_widget.write(msg)
-
-                self.pending_confirm = None
-                return
-            
-            else:
-                self.log_widget.write("[red]No pending confirmation.")
-
-
-
-        elif cmd.startswith("abort"):
-            parts = shlex.split(cmd)
-            if len(parts) < 2:
-                self.log_widget.write("[red]Usage: abort <delete|clearall>")
-                return
-
-            action = parts[1]
-
-            if action == "delete":
-                if self.pending_confirm and self.pending_confirm[0] == "delete":
-                    self.log_widget.write(f"[cyan]Delete of '{self.pending_confirm[1].name}' aborted.")
-                    self.pending_confirm = None
-                else:
-                    self.log_widget.write("[yellow]No delete operation to abort.")
-
-            elif action == "clearall":
-                if self.pending_confirm and self.pending_confirm[0] == "clearall":
-                    target = self.pending_confirm[1]  # string: mem/file/both
-                    self.log_widget.write(f"[cyan]Clearall '{target}' aborted.")
-                    self.pending_confirm = None
-                else:
-                    self.log_widget.write("[yellow]No clearall operation to abort.")
-
-            else:
-                self.log_widget.write(f"[red]Unknown abort target: {action}")
-
-
-
-
-        elif cmd.startswith("toggle"):
-            parts = shlex.split(cmd)
-
-            if len(parts) < 2:
-                self.log_widget.write("[red]Usage: toggle <id>")
-                return
-
-            target_id = parts[1]
-            target = self.find_node_by_id(target_id)
-            if not target:
-                self.log_widget.write(f"[red]Node with ID '{target_id}' not found.")
-                return
-
-            old_status = target.completed
-            toggle_all(target)
-            new_status = target.completed
-
-            self.log_widget.write(f"[green]Toggled '{target.name}' and all descendants from {old_status} to {new_status}.")
-
-
-
-        elif cmd.startswith("edit"):
-            try:
+            elif cmd.startswith("schema"):
                 parts = shlex.split(cmd)
-
-                if len(parts) >= 2 and parts[1] == "--help":
-                    self.log_widget.write("[cyan]Usage:")
-                    self.log_widget.write("  edit <id> [--name \"...\"] [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD]")
-                    self.log_widget.write("Example:")
-                    self.log_widget.write("  edit 01.02 --name \"New Name\" --desc \"Short\" --full \"Detailed\" --deadline 2025-08-15")
-                    return
-
-                from core.parser import parse_edit_args
-                args = parse_edit_args(parts)
-
-                node = self.find_node_by_id(args["id"])
-                if not node:
-                    self.log_widget.write(f"[red]Node with ID '{args['id']}' not found.")
-                    return
-
-                changes = []
-                if args["name"]:
-                    node.name = args["name"]
-                    changes.append(f"name → '{args['name']}'")
-                if args["short_desc"]:
-                    node.short_desc = args["short_desc"]
-                    changes.append(f"short_desc → '{args['short_desc']}'")
-                if args["full_desc"]:
-                    node.full_desc = args["full_desc"]
-                    changes.append(f"full_desc → '{args['full_desc']}'")
-                if args["deadline"]:
-                    node.deadline = args["deadline"]
-                    changes.append(f"deadline → {args['deadline']}")
-
-                if changes:
-                    self.log_widget.write(f"[green]Updated node {node.id}: " + ", ".join(changes))
+                if len(parts) < 2:
+                    self.log_widget.write(format_warn("Usage: schema Project Phase Task Subtask", timestamp = False))
                 else:
-                    self.log_widget.write(f"[yellow]No changes made to node {node.id}.")
-
-            except Exception as e:
-                self.log_widget.write(f"[red]Error: {e}")
-
-        
-
-        elif cmd.startswith("search"):
-            try:
-                parts = shlex.split(cmd)
-
-                if len(parts) >= 2 and parts[1] == "--help":
-                    self.log_widget.write("[cyan]Usage:")
-                    self.log_widget.write("  search <substring>")
-                    self.log_widget.write("  search name <substring>")
-                    self.log_widget.write("  search id <prefix-or-exact>")
-                    return
-
-                from core.parser import parse_search_args
-                args = parse_search_args(parts)
-
-                matches = []
-                if args["mode"] == "id":
-                    q = args["query"]
-                    for n in self.iter_nodes():
-                        if n.id == q or n.id.startswith(q):
-                            matches.append(n)
-                else:  # name
-                    q = args["query"].lower()
-                    for n in self.iter_nodes():
-                        if q in n.name.lower():
-                            matches.append(n)
-
-                if not matches:
+                    new_hierarchy = parts[1:]
                     if not self.nodes:
-                        self.log_widget.write("[yellow]No data loaded.")
-                        return
+                        self.schema = NodeSchema(new_hierarchy)
+                        self.log_widget.write(format_success(f"Schema set to: {' > '.join(new_hierarchy)} (no data to update)"))
+                        self.mutated = True
                     else:
-                        self.log_widget.write("[yellow]No matches.")
+                        try:
+                            for root in self.nodes:
+                                depth = self.schema.validate_tree_depth(root)
+                                if depth != len(new_hierarchy):
+                                    self.log_widget.write(
+                                        format_error(f"Cannot switch schema: current tree depth = {depth}, new schema = {len(new_hierarchy)}")
+                                    )
+                                    return
+                                
+                            for root in self.nodes:
+                                NodeSchema(new_hierarchy).relabel_tree_to_match(root)
+
+                            self.schema = NodeSchema(new_hierarchy)
+                            self.log_widget.write(format_success(f"Schema switched and node types updated to: {' > '.join(new_hierarchy)}"))
+                            self.mutated = True
+                        except Exception as e:
+                            self.log_widget.write(format_error(f"Schema change error: {e}"))
+                
+            
+            elif cmd.startswith("delete"):
+                parts = shlex.split(cmd)
+                if len(parts) < 2:
+                    self.log_widget.write(format_warn("Usage: delete <id>", timestamp=False))
+                    return
+
+                target_id = parts[1]
+                target = self.find_node_by_id(target_id)
+                if not target:
+                    self.log_widget.write(format_error(f"Node with ID '{target_id}' not found.", as_panel=False))
+                    return
+
+                self.log_widget.write(
+                    f"[yellow]Are you sure you want to delete '{target.name}' (ID: {target.id})?"
+                    f" Type: 'confirm delete {target.id}' or 'abort delete' to cancel operation."
+                )
+                self.pending_confirm = ("delete", target)
+
+            elif cmd.startswith("clearall"):
+                parts = shlex.split(cmd)
+
+                if len(parts) >= 2 and parts[1] == "--help":
+                    self.log_widget.write("[cyan]Usage:")
+                    self.log_widget.write("  clearall mem    # Clear all nodes from memory")
+                    self.log_widget.write("  clearall file   # Delete saved data file (node_data.json)")
+                    self.log_widget.write("  clearall both   # Clear memory and delete file")
+                    return
+
+                if len(parts) < 2 or parts[1] not in ("mem", "file", "both"):
+                    self.log_widget.write(format_warn("Usage: clearall <mem|file|both>", timestamp=False))
+                    return
+
+                action = parts[1]
+
+                if not self.pending_confirm:
+                    self.log_widget.write(
+                        f"[yellow]Are you sure you want to clear '{action}'? "
+                        f"Type: 'confirm clearall {action}' or 'abort clearall' to cancel."
+                    )
+                    self.pending_confirm = ("clearall", action)
+                    return
+
+            elif cmd.startswith("confirm"):
+                parts = shlex.split(cmd)
+                if len(parts) < 3:
+                    self.log_widget.write(format_warn("Usage: confirm delete <id>", timestamp=False))
+                    return
+
+                action = parts[1]
+                target_id = parts[2]
+
+                if self.pending_confirm and self.pending_confirm[0] == "delete":
+                    target = self.pending_confirm[1]
+                    if target.id != target_id:
+                        self.log_widget.write(format_error(f"Mismatched confirmation ID. Pending: {target.id}, got: {target_id}"))
                         return
 
-                from rich.table import Table
-                table = Table(show_header=True, header_style="bold cyan")
-                table.add_column("ID", style="bold", width=12)
-                table.add_column("Name", style="white")
-                table.add_column("Type", style="cyan", width=10)
-                table.add_column("Ready", style="green", width=6)
-                table.add_column("Deadline", style="white", width=12)
+                    if target.parent:
+                        target.parent.children = [c for c in target.parent.children if c.id != target.id]
+                        self.log_widget.write(format_success(f"Deleted node '{target.name}' (ID: {target.id}) from parent {target.parent.id}"))
+                        self.mutated = True
+                    else:
+                        self.nodes = [n for n in self.nodes if n.id != target.id]
+                        self.log_widget.write(format_success(f"Deleted root node '{target.name}' (ID: {target.id})"))
+                        self.mutated = True
 
-                for n in matches:
-                    ready = "[X]" if n.completed else "[ ]"
-                    deadline = n.deadline if n.deadline else "-"
-                    table.add_row(n.id, n.name, n.type, ready, deadline)
-
-                self.log_widget.write(f"[bold cyan]Search results ({len(matches)}):")
-                self.log_widget.write(table)
-
-            except Exception as e:
-                self.log_widget.write(f"[red]Error: {e}")
+                    self.pending_confirm = None
 
 
+                if self.pending_confirm and self.pending_confirm[0] == "clearall":
+                    from core.data_io import delete_data_file
+                    target = self.pending_confirm[1]
+
+                    if target == "mem":
+                        self.nodes.clear()
+                        self.log_widget.write(format_success("All in-memory nodes cleared."))
+                    elif target == "file":
+                        deleted = delete_data_file()
+                        if deleted:
+                            self.log_widget.write(format_success("Data file deleted."))
+                            self.mutated = True
+                        else:
+                            self.log_widget.write(format_warn("No data file found to delete.", timestamp=False))
+                    elif target == "both":
+                        self.nodes.clear()
+                        deleted = delete_data_file()
+                        msg = format_success("Memory cleared. " + ("Data file deleted." if deleted else "No data file found."))
+                        self.mutated = True
+                        self.log_widget.write(msg)
+
+                    self.pending_confirm = None
+                    return
+                
+                else:
+                    self.log_widget.write(format_warn("No pending confirmation.", timestamp=False))
 
 
-        elif cmd == "help":
-            from core.data_io import load_help_text
-            for line in load_help_text():
-                self.log_widget.write(line)
 
-        else:
-            self.log_widget.write(f"[red]Unknown command: {cmd}")
+            elif cmd.startswith("abort"):
+                parts = shlex.split(cmd)
+                if len(parts) < 2:
+                    self.log_widget.write(format_warn("Usage: abort <delete|clearall>", timestamp=False))
+                    return
+
+                action = parts[1]
+
+                if action == "delete":
+                    if self.pending_confirm and self.pending_confirm[0] == "delete":
+                        self.log_widget.write(format_info(f"Delete of '{self.pending_confirm[1].name}' aborted.", timestamp=False))
+                        self.pending_confirm = None
+                    else:
+                        self.log_widget.write(format_warn("No delete operation to abort.", timestamp=False))
+
+                elif action == "clearall":
+                    if self.pending_confirm and self.pending_confirm[0] == "clearall":
+                        target = self.pending_confirm[1]  # string: mem/file/both
+                        self.log_widget.write(format_info(f"Clearall '{target}' aborted.", timestamp=False))
+                        self.pending_confirm = None
+                    else:
+                        self.log_widget.write(format_warn("No clearall operation to abort.", timestamp=False))
+
+                else:
+                    self.log_widget.write(format_error(f"Unknown abort target: {action}"))
+
+
+
+
+            elif cmd.startswith("toggle"):
+                parts = shlex.split(cmd)
+
+                if len(parts) < 2:
+                    self.log_widget.write(format_warn("Usage: toggle <id>", timestamp=False))
+                    return
+
+                target_id = parts[1]
+                target = self.find_node_by_id(target_id)
+                if not target:
+                    self.log_widget.write(format_error(f"Node with ID '{target_id}' not found."))
+                    return
+
+                old_status = target.completed
+                toggle_all(target)
+                new_status = target.completed
+
+                self.log_widget.write(f"[green]Toggled '{target.name}' and all descendants from {old_status} to {new_status}.")
+                self.mutated = True
+
+
+
+            elif cmd.startswith("edit"):
+                try:
+                    parts = shlex.split(cmd)
+
+                    if len(parts) >= 2 and parts[1] == "--help":
+                        self.log_widget.write("[cyan]Usage:")
+                        self.log_widget.write("  edit <id> [--name \"...\"] [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD]")
+                        self.log_widget.write("Example:")
+                        self.log_widget.write("  edit 01.02 --name \"New Name\" --desc \"Short\" --full \"Detailed\" --deadline 2025-08-15")
+                        self.mutated = True
+
+                    from core.parser import parse_edit_args
+                    args = parse_edit_args(parts)
+
+                    node = self.find_node_by_id(args["id"])
+                    if not node:
+                        self.log_widget.write(format_error(f"Node with ID '{args['id']}' not found."))
+                        return
+
+                    changes = []
+                    if args["name"]:
+                        node.name = args["name"]
+                        changes.append(f"name → '{args['name']}'")
+                    if args["short_desc"]:
+                        node.short_desc = args["short_desc"]
+                        changes.append(f"short_desc → '{args['short_desc']}'")
+                    if args["full_desc"]:
+                        node.full_desc = args["full_desc"]
+                        changes.append(f"full_desc → '{args['full_desc']}'")
+                    if args["deadline"]:
+                        node.deadline = args["deadline"]
+                        changes.append(f"deadline → {args['deadline']}")
+
+                    if changes:
+                        self.log_widget.write(format_success(f"Updated node {node.id}: " + ", ".join(changes)))
+                        self.mutated = True
+                    else:
+                        self.log_widget.write(format_info(f"No changes made to node {node.id}."))
+
+                except Exception as e:
+                    self.log_widget.write(format_warn(f"{e}"))
+
+            
+
+            elif cmd.startswith("search"):
+                try:
+                    parts = shlex.split(cmd)
+
+                    if len(parts) >= 2 and parts[1] == "--help":
+                        self.log_widget.write("[cyan]Usage:")
+                        self.log_widget.write("  search <substring>")
+                        self.log_widget.write("  search name <substring>")
+                        self.log_widget.write("  search id <prefix-or-exact>")
+                        return
+
+                    from core.parser import parse_search_args
+                    args = parse_search_args(parts)
+
+                    matches = []
+                    if args["mode"] == "id":
+                        q = args["query"]
+                        for n in self.iter_nodes():
+                            if n.id == q or n.id.startswith(q):
+                                matches.append(n)
+                    else:  # name
+                        q = args["query"].lower()
+                        for n in self.iter_nodes():
+                            if q in n.name.lower():
+                                matches.append(n)
+
+                    if not matches:
+                        if not self.nodes:
+                            self.log_widget.write(format_warn("No data loaded."))
+                            return
+                        else:
+                            self.log_widget.write(format_warn("No matches."))
+                            return
+
+                    from rich.table import Table
+                    table = Table(show_header=True, header_style="bold cyan")
+                    table.add_column("ID", style="bold", width=12)
+                    table.add_column("Name", style="white")
+                    table.add_column("Type", style="cyan", width=10)
+                    table.add_column("Ready", style="green", width=6)
+                    table.add_column("Deadline", style="white", width=12)
+
+                    for n in matches:
+                        ready = "[X]" if n.completed else "[ ]"
+                        deadline = n.deadline if n.deadline else "-"
+                        table.add_row(n.id, n.name, n.type, ready, deadline)
+
+                    self.log_widget.write(f"[bold cyan]Search results ({len(matches)}):")
+                    self.log_widget.write(table)
+
+                except Exception as e:
+                    self.log_widget.write(format_error(f"Error: {e}"))
+
+
+            elif cmd.startswith("autosave"):
+                parts = shlex.split(cmd)
+
+                if len(parts) >= 2 and parts[1] == "--help" or len(parts) == 1:
+                    self.log_widget.write("[cyan]Usage:")
+                    self.log_widget.write("  autosave <on/off>")
+                    return
+                
+                if parts[1] == "on":
+                    self.config["autosave"] = True
+                    self.log_widget.write(format_success("Config changed: 'autosave': ON"))
+                elif parts[1] == "off":
+                    self.config["autosave"] = False
+                    self.log_widget.write(format_success("Config changed: 'autosave': OFF"))
+                else:
+                    self.log_widget.write(format_warn("Invalid input! Usage: autosave <on/off>"))
+                
+                save_config(self.config)
+
+
+
+            elif cmd == "help":
+                from core.data_io import load_help_text
+                for line in load_help_text():
+                    self.log_widget.write(line)
+
+            else:
+                self.log_widget.write(format_error(f"Unknown command: {cmd}"))
+
+
+        finally:
+            if self.mutated and self.config["autosave"]:
+                try:
+                    save_node_tree(self.nodes)
+                    self.log_widget.write(format_success("Autosave done."))
+                except Exception as e:
+                    self.log_widget.write(f"[red]Autosave failed: {e}")
 
 
 

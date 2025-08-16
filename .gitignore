@@ -84,3 +84,4 @@ log/
 # Keep the data folder, ignore its contents
 data/*
 !data/.gitkeep
+temp/*

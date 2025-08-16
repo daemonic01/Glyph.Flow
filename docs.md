@@ -205,6 +205,14 @@ Displays this help message.
 
 ---
 
+## ⚙️ Config
+
+### autosave <on/off>
+
+Turn auto-save on and off.
+
+---
+
 ## 🚪 Exit
 
 ### `q` or `quit`
@@ -213,10 +221,11 @@ Quits the application.
 
 ---
 
+
 ## ⚠️ Notes
 
-- **Automatic saving/loading is not yet implemented.**  
-  Use `save` and `load` manually when needed.
+- **Automatic saving is already implemented.**
+  Running the "save" command is no longer necessary after making changes if autosave is enabled (default).
 
 - You can use `sample` to generate a sample tree, then explore it using any of the display commands like `tree`, `table`, or `ascii`.
 

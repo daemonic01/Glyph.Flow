@@ -1,0 +1,8 @@
+{
+    "version": "0.1.0a3",
+    "paths": {
+        "data": "data/node_data.json",
+        "help": "assets/help.txt"
+    },
+    "autosave": true
+}
