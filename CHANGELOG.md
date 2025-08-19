@@ -2,6 +2,27 @@
 
 ---
 
+## [v0.1.0a4] – 2025-08-19
+
+### ✨ Added
+- Introduced layered and leveled logging and internal messaging system
+- All commands in `app.py` migrated to use the new logging system (except view outputs)
+- Added `CommandHistory` module with arrow-key navigation
+- Foundation for upcoming Command Registry system
+
+### 🔧 Improved
+- More efficient internal and external log management.
+- Minor changes in the backend, preparation for a complete separation from the frontend.
+
+### 🐛 Known Limitations
+- No undo/redo system
+- No system message buffer/logging
+- No localized messaging system.
+- Manual command input only – no TUI or keybindings yet
+- No export/import feature.
+
+---
+
 ## [v0.1.0a3] – 2025-08-16
 
 ### ✨ Added

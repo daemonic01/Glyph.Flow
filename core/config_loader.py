@@ -3,12 +3,21 @@ import os
 from pathlib import Path
 
 DEFAULT_CONFIG = {
-    "version": "0.1.0a3",
-    "paths": {
-        "data": "data/node_data.json",
-        "help": "assets/help.txt"
-    },
-    "autosave": False
+  "version": "0.1.0a3",
+  "paths": {
+    "data": "data/node_data.json",
+    "help": "assets/help.txt",
+    "messages": "loc/en/messages.json",
+    "syslog": "logs/app.log"
+  },
+  "logging": False,
+  "log": {
+    "rotate": {
+      "max_bytes": 262144,
+      "backup_count": 5
+    }
+  },
+  "autosave": True
 }
 
 BASE_DIR = Path(__file__).resolve().parent.parent

@@ -2,6 +2,7 @@ from textual.app import App, ComposeResult
 from textual.widgets import Input, RichLog
 from textual.containers import Vertical
 from textual.reactive import reactive
+from textual import events
 from core.data_io import save_node_tree, load_node_tree, create_sample_tree
 from core.node import Node
 from typing import Optional
@@ -10,7 +11,9 @@ from core.schema import NodeSchema
 from core.parser import parse_create_args
 from core.utils import toggle_all
 from core.config_loader import load_config, save_config
-from core.content_styler import format_info, format_warn, format_error, format_success
+from core.message_styler import MessageCatalog
+from core.log import log
+from core.command_history import CommandHistory
 
 
 class GlyphApp(App):
@@ -31,9 +34,18 @@ class GlyphApp(App):
 
 
     def on_mount(self):
-        self.log_widget.write(f"[green]Node test environment initialized. Active version: {self.config["version"]} | Autosave: {"ON" if self.config["autosave"] else "OFF"}")
-        self.log_widget.write("Type 'help' to see all commands. Type 'sample' to generate a demo tree.")
+        messages_path = self.config["paths"].get("messages", "loc/en/messages.json")
+        self.msg = MessageCatalog.from_file(messages_path)
+        log.configure(writer=self.log_widget.write, catalog=self.msg, debug=self.config.get("debug", False))
+        log.configure_from_config(self.config)
+        self.history = CommandHistory(self.config["command_history_maxlen"])
+
+        autosave_state = "ON" if self.config.get("autosave") else "OFF"
+        log.key("system.startup", version=self.config["version"], autosave=autosave_state)
+        log.key("system.startup_hint")
+        
         self.input.focus()
+
 
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
@@ -41,28 +53,28 @@ class GlyphApp(App):
         self.mutated = False
         cmd = event.value.strip()
         self.input.value = ""
-        self.log_widget.write(f"[bold magenta]> {cmd}")
+        log.key("system.cmd_input", cmd=cmd)
+        self.history.add(cmd)
 
         try:
             if cmd == "q" or cmd == "quit":
+                log.close()
                 self.exit()
 
             elif cmd == "sample":
                 self.nodes = create_sample_tree()
-                self.log_widget.write(format_success("Sample tree created."))
+                log.key("file.sample_tree_created")
                 self.mutated = True
 
             elif cmd == "save":
                 save_node_tree(self.nodes)
-                self.log_widget.write(format_success("Data saved to 'node_data.json'."))
 
             elif cmd == "load":
                 self.nodes = load_node_tree()
-                self.log_widget.write(format_success("Data loaded from 'node_data.json'."))
 
             elif cmd == "ls":
                 if not self.nodes:
-                    self.log_widget.write(format_warn("No data loaded."))
+                    log.key("file.no_data")
                 else:
                     self.log_widget.write("[bold cyan]Root nodes:")
                     for n in self.nodes:
@@ -70,7 +82,7 @@ class GlyphApp(App):
 
             elif cmd == "tree":
                 if not self.nodes:
-                    self.log_widget.write(format_warn("No data loaded."))
+                    log.key("file.no_data")
                 else:
                     self.log_widget.write("[bold cyan]Tree view:")
                     for n in self.nodes:
@@ -78,7 +90,7 @@ class GlyphApp(App):
             
             elif cmd == "ascii":
                 if not self.nodes:
-                    self.log_widget.write(format_warn("No data loaded."))
+                    log.key("file.no_data")
                 else:
                     self.log_widget.write("[bold cyan]ASCII Tree View:")
                     for i, root in enumerate(self.nodes):
@@ -89,7 +101,7 @@ class GlyphApp(App):
 
             elif cmd == "table":
                 if not self.nodes:
-                    self.log_widget.write(format_warn("No data loaded."))
+                    log.key("file.no_data")
                 else:
                     self.render_table_view()
             
@@ -103,10 +115,10 @@ class GlyphApp(App):
                     parts = shlex.split(cmd)
 
                     if len(parts) >= 2 and parts[1] == "--help":
-                        self.log_widget.write("[cyan]Usage:")
-                        self.log_widget.write("  create <type> <name> [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD] [--parent <id>]")
-                        self.log_widget.write("Example:")
-                        self.log_widget.write("  create Task \"Refactor\" --desc \"Cleanup\" --full \"Split\" --deadline 2025-08-12 --parent 01.01")
+                        log.help("Usage:")
+                        log.help("  create <type> <name> [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD] [--parent <id>]")
+                        log.help("Example:")
+                        log.help("  create Task \"Refactor\" --desc \"Cleanup\" --full \"Split\" --deadline 2025-08-12 --parent 01.01")
                         return
         
                     args = parse_create_args(parts)
@@ -124,93 +136,83 @@ class GlyphApp(App):
                         if parent:
                             if not self.schema.is_valid_child(parent, args["type"]):
                                 expected = self.schema.get_expected_child_type(parent)
-                                self.log_widget.write(
-                                    format_error(
-                                    f"Invalid type: cannot create '{args['type']}' under '{parent.type}' "
-                                    f"(expected: '{expected}')"
-                                    ))
+                                log.key("node.create_invalid", type=args['type'], parent_type=parent.type, expected=expected)
                                 return
 
                             parent.add_child(new_node)
-                            self.log_widget.write(format_success(f"Added '{args['name']}' under {parent.id} → New ID: {new_node.id}"))
+                            log.key("node.create_child", name=args['name'], parent_id=parent.id, id=new_node.id)
                             self.mutated = True
                         else:
-                            self.log_widget.write(format_error(f"Parent ID '{args['parent_id']}' not found.)"))
+                            log.key("node.create_parent_not_found", parent_id=args['parent_id'])
                     else:
                         if not self.schema.is_valid_child(None, args["type"]):
                             expected = self.schema.get_expected_child_type(None)
-                            self.log_widget.write(format_error(f"Root node must be of type '{expected}', not '{args['type']}'"))
+                            log.key("node.create_root_node_type_error", expected=expected, type=args['type'])
                             return
 
                         self.nodes.append(new_node)
-                        self.log_widget.write(format_success(f"Created root node: {args['name']} → ID: {new_node.id}"))
+                        log.key("node.create_root", name=args['name'], id=new_node.id)
                         self.mutated = True
 
                 except Exception as e:
-                    self.log_widget.write(format_warn(f"{e}"))
+                    log.error(f"{e}")
 
 
 
             elif cmd.startswith("schema"):
                 parts = shlex.split(cmd)
                 if len(parts) < 2:
-                    self.log_widget.write(format_warn("Usage: schema Project Phase Task Subtask", timestamp = False))
+                    log.help("Usage: schema Project Phase Task Subtask")
                 else:
                     new_hierarchy = parts[1:]
                     if not self.nodes:
                         self.schema = NodeSchema(new_hierarchy)
-                        self.log_widget.write(format_success(f"Schema set to: {' > '.join(new_hierarchy)} (no data to update)"))
-                        self.mutated = True
+                        log.key("schema.set_success", schema=' > '.join(new_hierarchy))
                     else:
                         try:
                             for root in self.nodes:
                                 depth = self.schema.validate_tree_depth(root)
                                 if depth != len(new_hierarchy):
-                                    self.log_widget.write(
-                                        format_error(f"Cannot switch schema: current tree depth = {depth}, new schema = {len(new_hierarchy)}")
-                                    )
+                                    log.key("schema.depth_error", depth=depth, new_depth=len(new_hierarchy))
                                     return
                                 
                             for root in self.nodes:
                                 NodeSchema(new_hierarchy).relabel_tree_to_match(root)
 
                             self.schema = NodeSchema(new_hierarchy)
-                            self.log_widget.write(format_success(f"Schema switched and node types updated to: {' > '.join(new_hierarchy)}"))
+                            log.key("schema.switch_success", schema=' > '.join(new_hierarchy))
                             self.mutated = True
                         except Exception as e:
-                            self.log_widget.write(format_error(f"Schema change error: {e}"))
+                            log.key("schema.error", error=e)
                 
             
             elif cmd.startswith("delete"):
                 parts = shlex.split(cmd)
                 if len(parts) < 2:
-                    self.log_widget.write(format_warn("Usage: delete <id>", timestamp=False))
+                    log.help("Usage: delete <id>")
                     return
 
                 target_id = parts[1]
                 target = self.find_node_by_id(target_id)
                 if not target:
-                    self.log_widget.write(format_error(f"Node with ID '{target_id}' not found.", as_panel=False))
+                    log.key("node.node_not_found", id=target_id)
                     return
 
-                self.log_widget.write(
-                    f"[yellow]Are you sure you want to delete '{target.name}' (ID: {target.id})?"
-                    f" Type: 'confirm delete {target.id}' or 'abort delete' to cancel operation."
-                )
+                log.key("confirmation.delete_confirm", target_name=target.name, target_id=target.id)
                 self.pending_confirm = ("delete", target)
 
             elif cmd.startswith("clearall"):
                 parts = shlex.split(cmd)
 
                 if len(parts) >= 2 and parts[1] == "--help":
-                    self.log_widget.write("[cyan]Usage:")
-                    self.log_widget.write("  clearall mem    # Clear all nodes from memory")
-                    self.log_widget.write("  clearall file   # Delete saved data file (node_data.json)")
-                    self.log_widget.write("  clearall both   # Clear memory and delete file")
+                    log.help("Usage:")
+                    log.help("  clearall mem    # Clear all nodes from memory")
+                    log.help("  clearall file   # Delete saved data file (node_data.json)")
+                    log.help("  clearall both   # Clear memory and delete file")
                     return
 
                 if len(parts) < 2 or parts[1] not in ("mem", "file", "both"):
-                    self.log_widget.write(format_warn("Usage: clearall <mem|file|both>", timestamp=False))
+                    log.help("Usage: clearall <mem|file|both>")
                     return
 
                 action = parts[1]
@@ -226,7 +228,7 @@ class GlyphApp(App):
             elif cmd.startswith("confirm"):
                 parts = shlex.split(cmd)
                 if len(parts) < 3:
-                    self.log_widget.write(format_warn("Usage: confirm delete <id>", timestamp=False))
+                    log.help("Usage: confirm delete <id>")
                     return
 
                 action = parts[1]
@@ -235,19 +237,20 @@ class GlyphApp(App):
                 if self.pending_confirm and self.pending_confirm[0] == "delete":
                     target = self.pending_confirm[1]
                     if target.id != target_id:
-                        self.log_widget.write(format_error(f"Mismatched confirmation ID. Pending: {target.id}, got: {target_id}"))
+                        log.key("confirmation.mismatched_id", targets_id=target.id, target_id=target_id)
                         return
 
                     if target.parent:
                         target.parent.children = [c for c in target.parent.children if c.id != target.id]
-                        self.log_widget.write(format_success(f"Deleted node '{target.name}' (ID: {target.id}) from parent {target.parent.id}"))
+                        log.key("node.delete_done", target_name=target.name, target_id=target.id, target_parent_id=target.parent.id)
                         self.mutated = True
                     else:
                         self.nodes = [n for n in self.nodes if n.id != target.id]
-                        self.log_widget.write(format_success(f"Deleted root node '{target.name}' (ID: {target.id})"))
+                        log.key("node.delete_root_done", target_name=target.name, target_id=target.id)
                         self.mutated = True
 
                     self.pending_confirm = None
+                    return
 
 
                 if self.pending_confirm and self.pending_confirm[0] == "clearall":
@@ -256,54 +259,56 @@ class GlyphApp(App):
 
                     if target == "mem":
                         self.nodes.clear()
-                        self.log_widget.write(format_success("All in-memory nodes cleared."))
+                        log.key("clearall.in_memory_done")
                     elif target == "file":
                         deleted = delete_data_file()
                         if deleted:
-                            self.log_widget.write(format_success("Data file deleted."))
+                            log.key("clearall.data_file_done")
                             self.mutated = True
                         else:
-                            self.log_widget.write(format_warn("No data file found to delete.", timestamp=False))
+                            log.key("clearall.file_not_found")
                     elif target == "both":
                         self.nodes.clear()
                         deleted = delete_data_file()
-                        msg = format_success("Memory cleared. " + ("Data file deleted." if deleted else "No data file found."))
+                        if deleted:
+                            log.key("both_done")
+                        else:
+                            log.key("both_mem_done")
                         self.mutated = True
-                        self.log_widget.write(msg)
 
                     self.pending_confirm = None
                     return
                 
                 else:
-                    self.log_widget.write(format_warn("No pending confirmation.", timestamp=False))
+                    log.key("confirmation.no_pending_confirm")
 
 
 
             elif cmd.startswith("abort"):
                 parts = shlex.split(cmd)
                 if len(parts) < 2:
-                    self.log_widget.write(format_warn("Usage: abort <delete|clearall>", timestamp=False))
+                    log.help("Usage: abort <delete|clearall>")
                     return
 
                 action = parts[1]
 
                 if action == "delete":
                     if self.pending_confirm and self.pending_confirm[0] == "delete":
-                        self.log_widget.write(format_info(f"Delete of '{self.pending_confirm[1].name}' aborted.", timestamp=False))
+                        log.key("abort.delete_aborted", target=self.pending_confirm[1].name)
                         self.pending_confirm = None
                     else:
-                        self.log_widget.write(format_warn("No delete operation to abort.", timestamp=False))
+                        log.key("abort.no_pending_delete")
 
                 elif action == "clearall":
                     if self.pending_confirm and self.pending_confirm[0] == "clearall":
                         target = self.pending_confirm[1]  # string: mem/file/both
-                        self.log_widget.write(format_info(f"Clearall '{target}' aborted.", timestamp=False))
+                        log.key("abort.clearall_aborted", target=target)
                         self.pending_confirm = None
                     else:
-                        self.log_widget.write(format_warn("No clearall operation to abort.", timestamp=False))
+                        log.key("abort.no_pending_clearall")
 
                 else:
-                    self.log_widget.write(format_error(f"Unknown abort target: {action}"))
+                    log.key("abort.unknown_target_action", action=action)
 
 
 
@@ -312,20 +317,20 @@ class GlyphApp(App):
                 parts = shlex.split(cmd)
 
                 if len(parts) < 2:
-                    self.log_widget.write(format_warn("Usage: toggle <id>", timestamp=False))
+                    log.help("Usage: toggle <id>")
                     return
 
                 target_id = parts[1]
                 target = self.find_node_by_id(target_id)
                 if not target:
-                    self.log_widget.write(format_error(f"Node with ID '{target_id}' not found."))
+                    log.key("node.node_not_found", id=target_id)
                     return
 
                 old_status = target.completed
                 toggle_all(target)
                 new_status = target.completed
 
-                self.log_widget.write(f"[green]Toggled '{target.name}' and all descendants from {old_status} to {new_status}.")
+                log.key("node.toggled", target_name=target.name, old_status=old_status, new_status=new_status)
                 self.mutated = True
 
 
@@ -335,10 +340,10 @@ class GlyphApp(App):
                     parts = shlex.split(cmd)
 
                     if len(parts) >= 2 and parts[1] == "--help":
-                        self.log_widget.write("[cyan]Usage:")
-                        self.log_widget.write("  edit <id> [--name \"...\"] [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD]")
-                        self.log_widget.write("Example:")
-                        self.log_widget.write("  edit 01.02 --name \"New Name\" --desc \"Short\" --full \"Detailed\" --deadline 2025-08-15")
+                        log.help("[cyan]Usage:")
+                        log.help("  edit <id> [--name \"...\"] [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD]")
+                        log.help("Example:")
+                        log.help("  edit 01.02 --name \"New Name\" --desc \"Short\" --full \"Detailed\" --deadline 2025-08-15")
                         self.mutated = True
 
                     from core.parser import parse_edit_args
@@ -346,7 +351,7 @@ class GlyphApp(App):
 
                     node = self.find_node_by_id(args["id"])
                     if not node:
-                        self.log_widget.write(format_error(f"Node with ID '{args['id']}' not found."))
+                        log.key("node.node_not_found", id=args['id'])
                         return
 
                     changes = []
@@ -364,13 +369,14 @@ class GlyphApp(App):
                         changes.append(f"deadline → {args['deadline']}")
 
                     if changes:
-                        self.log_widget.write(format_success(f"Updated node {node.id}: " + ", ".join(changes)))
+                        info = ", ".join(changes)
+                        log.key("node.edit_done", id=node.id, info=info)
                         self.mutated = True
                     else:
-                        self.log_widget.write(format_info(f"No changes made to node {node.id}."))
+                        log.key("node.edit_no_change", id=node.id)
 
                 except Exception as e:
-                    self.log_widget.write(format_warn(f"{e}"))
+                    log.error(f"{e}")
 
             
 
@@ -402,10 +408,10 @@ class GlyphApp(App):
 
                     if not matches:
                         if not self.nodes:
-                            self.log_widget.write(format_warn("No data loaded."))
+                            log.key("file.no_data")
                             return
                         else:
-                            self.log_widget.write(format_warn("No matches."))
+                            log.key("node.search_no_matches")
                             return
 
                     from rich.table import Table
@@ -421,31 +427,33 @@ class GlyphApp(App):
                         deadline = n.deadline if n.deadline else "-"
                         table.add_row(n.id, n.name, n.type, ready, deadline)
 
-                    self.log_widget.write(f"[bold cyan]Search results ({len(matches)}):")
+                    log.key("node.search_results", nmatches=len(matches))
                     self.log_widget.write(table)
 
                 except Exception as e:
-                    self.log_widget.write(format_error(f"Error: {e}"))
+                    log.error(f"{e}")
 
 
             elif cmd.startswith("autosave"):
                 parts = shlex.split(cmd)
 
                 if len(parts) >= 2 and parts[1] == "--help" or len(parts) == 1:
-                    self.log_widget.write("[cyan]Usage:")
-                    self.log_widget.write("  autosave <on/off>")
+                    log.help("Usage: autosave <on/off>")
+                    return
+                
+                if parts[1] not in ("on", "off"):
+                    log.key("system.autosave_invalid_state")
                     return
                 
                 if parts[1] == "on":
                     self.config["autosave"] = True
-                    self.log_widget.write(format_success("Config changed: 'autosave': ON"))
-                elif parts[1] == "off":
-                    self.config["autosave"] = False
-                    self.log_widget.write(format_success("Config changed: 'autosave': OFF"))
                 else:
-                    self.log_widget.write(format_warn("Invalid input! Usage: autosave <on/off>"))
-                
+                    self.config["autosave"] = False
                 save_config(self.config)
+                log.key("system.autosave_changed", state=parts[1])
+                    
+                
+                
 
 
 
@@ -455,17 +463,36 @@ class GlyphApp(App):
                     self.log_widget.write(line)
 
             else:
-                self.log_widget.write(format_error(f"Unknown command: {cmd}"))
+                log.key("system.unknown_command", cmd=cmd)
 
 
         finally:
             if self.mutated and self.config["autosave"]:
                 try:
                     save_node_tree(self.nodes)
-                    self.log_widget.write(format_success("Autosave done."))
+                    log.key("system.autosave_done")
                 except Exception as e:
-                    self.log_widget.write(f"[red]Autosave failed: {e}")
+                    log.key("system.autosave_failed", error=e)
 
+
+    async def on_key(self, event: events.Key) -> None:
+        """Arrow history when the Input has focus."""
+        if not self.input.has_focus:
+            return
+        if event.key == "up":
+            prev = self.history.prev()
+            if prev is not None:
+                self.input.value = prev
+                self.input.cursor_position = len(prev)
+                event.prevent_default()
+                event.stop()
+        elif event.key == "down":
+            nxt = self.history.next()
+            if nxt is not None:
+                self.input.value = nxt
+                self.input.cursor_position = len(nxt)
+                event.prevent_default()
+                event.stop()
 
 
     async def print_node_recursive(self, node: Node, indent: int = 0, delay: float = 0.05):

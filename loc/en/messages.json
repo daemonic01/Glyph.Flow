@@ -1,0 +1,327 @@
+{
+  "meta": {
+    "version": "1.0",
+    "lang": "en"
+  },
+
+  "system": {
+    "startup": {
+      "level": "INFO",
+      "badge": "INFO",
+      "color": "#DDD6B8",
+      "text": "Node test environment initialized. Active version: {version} | Autosave: {autosave}"
+    },
+    "startup_hint": {
+        "level": "INFO",
+      "badge": "INFO",
+      "color": "#DDD6B8",
+      "text": "Type 'help' to see all commands. Type 'sample' to generate a demo tree."
+    },
+    "unknown_command": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Unknown command: {cmd}"
+    },
+    "cmd_input": {
+      "level": "INFO",
+      "badge": "CMD",
+      "color": "#DE5500",
+      "text": "> {cmd}"
+    },
+    "autosave_changed": {
+      "level": "INFO",
+      "badge": "SYS",
+      "color": "#DDD6B8",
+      "text": "Config changed: 'autosave': {state}"
+    },
+    "autosave_invalid_state": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Invalid input! Usage: autosave <on/off>"
+    },
+    "autosave_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Autosave done!"
+    },
+    "autosave_failed": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Autosave failed: {error}"
+    }
+  },
+
+  "file": {
+    "sample_tree_created": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Sample tree created."
+    },
+    "save_success": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Data saved to '{filename}'."
+    },
+    "no_data_to_save": {
+      "level": "INFO",
+      "badge": "INFO",
+      "color": "#DDD6B8",
+      "text": "No data to save."
+    },
+    "save_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Failed to save data: {error}"
+    },
+    "load_success": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Data loaded from '{filename}'."
+    },
+    "load_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Failed to load data from '{filename}'. File doesn't exists."
+    },
+    "no_data": {
+      "level": "WARNING",
+      "badge": "WARN",
+      "color": "yellow",
+      "text": "No data loaded."
+    }
+  },
+
+  "clearall": {
+    "in_memory_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "All in-memory nodes cleared."
+    },
+    "data_file_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Data file deleted."
+    },
+    "both_mem_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Memory cleared. No data file found."
+    },
+    "both_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Memory cleared. Data file deleted."
+    },
+    "file_not_found": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "No data file found to delete."
+    }
+  },
+
+  "schema": {
+    "set_success": {
+      "level": "INFO",
+      "badge": "INFO",
+      "color": "cyan",
+      "text": "Schema set to: {schema} (no data to update)"
+    },
+    "switch_success": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Schema switched and node types updated to: {schema}"
+    },
+    "depth_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Cannot switch schema: current tree depth = {depth}, new schema = {new_depth}"
+    },
+    "error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Schema change error: {error}"
+    }
+  },
+
+  "node": {
+    "create_root": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Created root node: {name} → ID: {id}"
+    },
+    "create_child": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Added '{name}' under {parent_id} → New ID: {id}"
+    },
+    "create_invalid": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Invalid type: cannot create '{type}' under '{parent_type}' (expected: '{expected}')"
+    },
+    "create_parent_not_found": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Parent ID '{parent_id}' not found.)"
+    },
+    "create_root_node_type_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Root node must be of type '{expected}', not '{type}'"
+    },
+    "node_not_found": {
+      "level": "WARNING",
+      "badge": "CONFIRM",
+      "color": "yellow",
+      "text": "Node with ID '{id}' not found."
+    },
+    "delete_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Deleted node '{target_name}' (ID: {target_id}) from parent {target_parent_id}"
+    },
+    "delete_root_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Deleted root node '{target_name}' (ID: {target_id})"
+    },
+    "toggled": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Toggled '{target_name}' and all descendants from {old_status} to {new_status}."
+    },
+    "edit_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Updated node {id}: {info}"
+    },
+    "edit_no_change": {
+      "level": "WARN",
+      "badge": "WARN",
+      "color": "yellow",
+      "text": "No changes made to node {id}."
+    },
+    "search_results": {
+      "level": "INFO",
+      "badge": "INFO",
+      "color": "cyan",
+      "text": "Search results ({nmatches}):"
+    },
+    "search_no_matches": {
+      "level": "WARN",
+      "badge": "WARN",
+      "color": "yellow",
+      "text": "No matches."
+    }
+  },
+
+  "confirmation": {
+    "delete_confirm": {
+      "level": "HELP",
+      "badge": "SYS",
+      "color": "cyan",
+      "text": "Are you sure you want to delete '{target_name}' (ID: {target_id})? Type: 'confirm delete {target_id}' or 'abort delete' to cancel operation."
+    },
+    "clearall_confirm": {
+      "level": "HELP",
+      "badge": "SYS",
+      "color": "cyan",
+      "text": "Usage: delete <id>"
+    },
+    "mismatched_id": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Mismatched confirmation ID. Pending: {targets_id}, got: {target_id}"
+    },
+    "no_pending_confirm": {
+      "level": "WARN",
+      "badge": "WARN",
+      "color": "yellow",
+      "text": "No pending confirmation."
+    }
+  },
+
+  "abort": {
+    "delete_aborted": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Delete of '{target}' aborted."
+    },
+    "no_pending_delete": {
+      "level": "WARN",
+      "badge": "WARN",
+      "color": "yellow",
+      "text": "No delete operation to abort."
+    },
+    "clearall_aborted": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Clearall '{target}' aborted."
+    },
+    "no_pending_clearall": {
+      "level": "WARN",
+      "badge": "WARN",
+      "color": "yellow",
+      "text": "No clearall operation to abort."
+    },
+    "unknown_target_action": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Unknown abort target action: {action}"
+    }
+  },
+
+  "help": {
+    "usage_create": {
+      "level": "HINT",
+      "badge": "HELP",
+      "color": "cyan",
+      "text": "Usage: create <type> <name> [--desc ...] [--full ...] [--deadline YYYY-MM-DD] [--parent <id>]"
+    },
+    "usage_delete": {
+      "level": "HINT",
+      "badge": "HELP",
+      "color": "cyan",
+      "text": "Usage: delete <id>"
+    }
+  },
+
+  "debug": {
+    "save_success": {
+      "level": "DEBUG",
+      "badge": "DEBUG",
+      "color": "magenta",
+      "text": "SAVE SUCCESSFUL: {file}"
+    }
+  }
+}

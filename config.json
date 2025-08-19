@@ -2,7 +2,17 @@
     "version": "0.1.0a3",
     "paths": {
         "data": "data/node_data.json",
-        "help": "assets/help.txt"
+        "help": "assets/help.txt",
+        "messages": "loc/en/messages.json",
+        "syslog": "logs/app.log"
     },
-    "autosave": true
+    "logging": true,
+    "log": {
+        "rotate": {
+            "max_bytes": 262144,
+            "backup_count": 5
+        }
+    },
+    "autosave": true,
+    "command_history_maxlen": 50
 }

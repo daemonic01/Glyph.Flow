@@ -3,12 +3,15 @@
 **Glyph.Flow** is a minimalist, keyboard-driven TUI workflow manager built with Python and [Textual](https://github.com/Textualize/textual).  
 It allows you to define hierarchical structures such as projects, phases, tasks, and subtasks, and manage them directly from the terminal.
 
-This is an early prototype (v0.1.0a2), mainly focused on backend data modeling and command parsing.
+This is an early prototype (v0.1.0a4), mainly focused on backend data modeling and command parsing.
 
 ---
 
 ## 🔧 Features
 
+- Layered logging system with message catalog (`log.key`, `log.help`)
+- Unified system messages with INFO/WARNING/ERROR/SUCCESS/DEBUG/HELP levels
+- Command history navigation (Up/Down arrows)
 - Universal tree structure based on a flexible `Node` class
 - Unique hierarchical segmented ID generation for all nodes
 - Type-checked schema (e.g. Project > Phase > Task > Subtask)
@@ -18,6 +21,8 @@ This is an early prototype (v0.1.0a2), mainly focused on backend data modeling a
 - Rich output: tree view, table view, ASCII rendering
 - Interactive confirmation for destructive operations (`delete`, `clearall`)
 - Help text loaded from external file for easier maintenance
+- Layered and leveled logging and internal messaging system with buffer prepared for lcalization.
+- Retrievable command history of the last 50 unique commands (Arrow keys in the input field.)
 
 ---
 
@@ -26,12 +31,18 @@ This is an early prototype (v0.1.0a2), mainly focused on backend data modeling a
 - `schema.py` – Enforces expected child types
 - `data_io.py` – Load/save trees and generate sample data
 - `parser.py` – Command-line argument parsers for various commands
+- `message_styler.py` - Advanved internal message system.
+- `log.py` - Log system that handles internal messages and external logging.
+- `command_history.py` - Retrieveable command history of the last 50 unique commands.
+- `config_loader.py` - Utility functions that handle external config.
 - `app.py` – Textual-based TUI frontend for testing
 
 ---
 
 ## 🧭 Roadmap Highlights
 - Planned for future versions:
+  - Command registry
+  - Improved scheme system
   - Advanced `search` filters (by type, regex, etc.)
   - Detailed TUI interface with main menu, project view, settings, and changelog
   - Undo support
@@ -112,6 +123,12 @@ Use the input field to enter commands (see below).
 ---
 
 ## 📜 Version History
+
+### v0.1.0a4 – 2025-08-19
+- Introduced layered and leveled logging and internal messaging system with buffer prepared for lcalization.
+- All commands in `app.py` migrated to use the new logging system (except view outputs)
+- Added `CommandHistory` module with arrow-key navigation
+- Foundation for upcoming Command Registry system
 
 ### v0.1.0a3 – 2025-08-16
 - Added autosave feature and `autosave` command.
