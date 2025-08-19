@@ -1,3 +1,6 @@
+<img width="1345" height="800" alt="image" src="https://github.com/user-attachments/assets/a3caaab1-a0ce-4cb6-9b83-448e7679662f" />
+
+
 # Glyph.Flow
 
 **Glyph.Flow** is a minimalist, keyboard-driven TUI workflow manager built with Python and [Textual](https://github.com/Textualize/textual).  
