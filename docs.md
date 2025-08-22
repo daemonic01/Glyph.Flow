@@ -76,17 +76,6 @@ delete 01.01
 
 ---
 
-### `confirm delete <id>`
-
-Confirms and executes the deletion of the node.
-
----
-
-### `abort delete`
-
-Cancels a pending deletion operation.
-
----
 
 ### `schema <type1> <type2> ...`
 
@@ -167,10 +156,6 @@ Clears the console log area.
 Saves the current node tree to `node_data.json`  
 (Default location: `glyphflow/data/node_data.json`)
 
-### `load`
-
-Loads the node tree from `node_data.json`
-
 ### `sample`
 
 Generates a pre-filled sample tree to experiment with.
@@ -179,21 +164,9 @@ Generates a pre-filled sample tree to experiment with.
 
 ## 🧹 Bulk Operations
 
-### `clearall mem`
+### `clearall`
 
-Clears all in-memory nodes. Requires confirmation.
-
-### `clearall file`
-
-Deletes the saved data file. Requires confirmation.
-
-### `clearall both`
-
-Clears memory and deletes the saved data file. Requires confirmation.
-
-### `abort clearall`
-
-Cancels a pending clearall operation.
+Clears all project nodes. Requires confirmation.
 
 ---
 
@@ -207,9 +180,9 @@ Displays this help message.
 
 ## ⚙️ Config
 
-### autosave <on/off>
+### config <setting> <on/off>
 
-Turn auto-save on and off.
+Turn auto-save / confirmation requests / logging on and off.
 
 ---
 

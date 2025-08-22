@@ -29,29 +29,49 @@
       "color": "#DE5500",
       "text": "> {cmd}"
     },
-    "autosave_changed": {
-      "level": "INFO",
-      "badge": "SYS",
-      "color": "#DDD6B8",
-      "text": "Config changed: 'autosave': {state}"
-    },
-    "autosave_invalid_state": {
-      "level": "ERROR",
-      "badge": "ERROR",
-      "color": "red",
-      "text": "Invalid input! Usage: autosave <on/off>"
-    },
     "autosave_done": {
       "level": "SUCCESS",
       "badge": "OK",
       "color": "green",
-      "text": "Autosave done!"
+      "text": "Autosave done! Config saved."
     },
     "autosave_failed": {
       "level": "ERROR",
       "badge": "ERROR",
       "color": "red",
       "text": "Autosave failed: {error}"
+    }
+  },
+  "config": {
+    "unknown_key": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Unknown key. Use: 'autosave', 'assume_yes'/'assume-yes', 'logging', or 'log'"
+    },
+    "invalid_value": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Invalid value for '{k}' key."
+    },
+    "no_change": {
+      "level": "INFO",
+      "badge": "INFO",
+      "color": "#DDD6B8",
+      "text": "No changes made on {setting}, value: {value}."
+    },
+    "set_success": {
+      "level": "SUCCESS",
+      "badge": "SUCCESS",
+      "color": "green",
+      "text": "Config changed: '{setting}': {value}"
+    },
+    "autosave_invalid_state": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Invalid input! Usage: autosave <on/off>"
     }
   },
 
@@ -61,6 +81,12 @@
       "badge": "OK",
       "color": "green",
       "text": "Sample tree created."
+    },
+    "manual_save_completed":{
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Manual save completed!."
     },
     "save_success": {
       "level": "SUCCESS",
@@ -101,35 +127,17 @@
   },
 
   "clearall": {
-    "in_memory_done": {
+    "clear_done": {
       "level": "SUCCESS",
       "badge": "OK",
       "color": "green",
-      "text": "All in-memory nodes cleared."
-    },
-    "data_file_done": {
-      "level": "SUCCESS",
-      "badge": "OK",
-      "color": "green",
-      "text": "Data file deleted."
-    },
-    "both_mem_done": {
-      "level": "SUCCESS",
-      "badge": "OK",
-      "color": "green",
-      "text": "Memory cleared. No data file found."
-    },
-    "both_done": {
-      "level": "SUCCESS",
-      "badge": "OK",
-      "color": "green",
-      "text": "Memory cleared. Data file deleted."
+      "text": "All nodes cleared."
     },
     "file_not_found": {
       "level": "ERROR",
       "badge": "ERROR",
       "color": "red",
-      "text": "No data file found to delete."
+      "text": "File not found."
     }
   },
 
@@ -146,7 +154,13 @@
       "color": "green",
       "text": "Schema switched and node types updated to: {schema}"
     },
-    "depth_error": {
+    "switch_default_success": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Schema switched and node types updated to default: {schema}"
+    },
+    "length_mismatch": {
       "level": "ERROR",
       "badge": "ERROR",
       "color": "red",
@@ -161,17 +175,11 @@
   },
 
   "node": {
-    "create_root": {
+    "created_node": {
       "level": "SUCCESS",
       "badge": "OK",
       "color": "green",
-      "text": "Created root node: {name} → ID: {id}"
-    },
-    "create_child": {
-      "level": "SUCCESS",
-      "badge": "OK",
-      "color": "green",
-      "text": "Added '{name}' under {parent_id} → New ID: {id}"
+      "text": "Created '{type}': {name} → ID: {id}"
     },
     "create_invalid": {
       "level": "ERROR",
@@ -183,7 +191,7 @@
       "level": "ERROR",
       "badge": "ERROR",
       "color": "red",
-      "text": "Parent ID '{parent_id}' not found.)"
+      "text": "Parent ID '{parent_id}' not found."
     },
     "create_root_node_type_error": {
       "level": "ERROR",
@@ -192,9 +200,9 @@
       "text": "Root node must be of type '{expected}', not '{type}'"
     },
     "node_not_found": {
-      "level": "WARNING",
-      "badge": "CONFIRM",
-      "color": "yellow",
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
       "text": "Node with ID '{id}' not found."
     },
     "delete_done": {

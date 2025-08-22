@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass
 from typing import Callable, Deque, Optional, Any, Tuple, TextIO
-import os, datetime
+import os
 from .config_loader import load_config
 
 from .message_styler import (
