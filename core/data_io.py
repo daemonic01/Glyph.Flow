@@ -21,12 +21,8 @@ def save_node_tree(root_nodes: List[Node], filename: str = str(DATA_PATH)):
         root_nodes (List[Node]): List of root-level Node objects to save.
         filename (str): Path to the JSON file where data will be written.
     """
-    if root_nodes:
-        with open(filename, "w", encoding="utf-8") as f:
-            json.dump([node.to_dict() for node in root_nodes], f, indent=2, ensure_ascii=False)
-            log.key("file.save_success", filename=DATA_PATH)
-    else:
-        log.key("file.no_data_to_save")
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump([node.to_dict() for node in root_nodes], f, indent=2, ensure_ascii=False)
     
 
 
@@ -56,40 +52,7 @@ def load_node_tree(filename: str = str(DATA_PATH)) -> List[Node]:
         return nodes
 
 
-class SampleTreeError(Exception):
-    """Raised when sample tree creation fails."""
 
-def create_sample_tree() -> List[Node]:
-    """Create a predefined sample tree structure for testing and demonstration.
-
-    Returns:
-        List[Node]: A list containing a single root project with nested phases, tasks, and subtasks.
-    """
-    try:
-        project = Node(name="Glyph.Flow", type="Project", short_desc="TUI workflow manager")
-
-        
-        phase1 = Node(name="Planning", type="Phase", short_desc="Design and requirements")
-        project.add_child(phase1)
-
-        task1 = Node(name="Define structure", type="Task", short_desc="Decide on Node model")
-        phase1.add_child(task1)
-
-        subtask1 = Node(name="Add progress support", type="Subtask", short_desc="Progress calculation logic")
-        task1.add_child(subtask1) 
-
-        phase2 = Node(name="Implementation", type="Phase", short_desc="Code the core system")
-        project.add_child(phase2)
-
-        task2 = Node(name="Write save/load", type="Task", short_desc="Create JSON I/O")
-        phase2.add_child(task2)
-
-        subtask2 = Node(name="Test with sample data", type="Subtask", short_desc="Load from file and inspect")
-        task2.add_child(subtask2)
-
-        return [project]
-    except SampleTreeError as e:
-        log.error(str(e))
 
 
 

@@ -3,7 +3,7 @@
 **Glyph.Flow** is a minimalist, keyboard-driven TUI workflow manager built with Python and [Textual](https://github.com/Textualize/textual).  
 It allows you to define hierarchical structures such as projects, phases, tasks, and subtasks, and manage them directly from the terminal.
 
-This is an early prototype (v0.1.0a4), mainly focused on backend data modeling and command parsing.
+This is an early prototype (v0.1.0a5), mainly focused on backend data modeling and command parsing.
 
 ---
 
@@ -17,12 +17,13 @@ This is an early prototype (v0.1.0a4), mainly focused on backend data modeling a
 - Type-checked schema (e.g. Project > Phase > Task > Subtask)
 - JSON-based save/load of full node trees
 - TUI-based test interface using `Textual`
-- Command-based interaction for early testing: `create`, `edit`, `delete`, `search`, `clearall`, `load`, `save`, etc.
+- Command-based interaction for early testing: `create`, `edit`, `delete`, `search`, `clearall`, `save`, etc.
 - Rich output: tree view, table view, ASCII rendering
 - Interactive confirmation for destructive operations (`delete`, `clearall`)
 - Help text loaded from external file for easier maintenance
 - Layered and leveled logging and internal messaging system with buffer prepared for lcalization.
 - Retrievable command history of the last 50 unique commands (Arrow keys in the input field.)
+- All commands are declaratively defined in a command registry system.
 
 ---
 
@@ -35,13 +36,15 @@ This is an early prototype (v0.1.0a4), mainly focused on backend data modeling a
 - `log.py` - Log system that handles internal messages and external logging.
 - `command_history.py` - Retrieveable command history of the last 50 unique commands.
 - `config_loader.py` - Utility functions that handle external config.
+- `context.py` - Real time global available data for operations.
+- `/controllers` - Command registry system.
+- `/handlers, /presenters, /services` - Clear handler function system for the command registry.
 - `app.py` – Textual-based TUI frontend for testing
 
 ---
 
 ## 🧭 Roadmap Highlights
 - Planned for future versions:
-  - Command registry
   - Improved scheme system
   - Advanced `search` filters (by type, regex, etc.)
   - Detailed TUI interface with main menu, project view, settings, and changelog
@@ -93,7 +96,6 @@ Use the input field to enter commands (see below).
 - `edit`                          – Edit an existing node (e.g. `edit 01.02 --name "New Name" --desc "Short" --full "Detailed" --deadline 2025-08-15`)
 - `delete`                        – Schedule deletion (e.g. `delete 01.01.01`)
 - `confirm delete <id>`           – Confirm a pending delete
-- `abort delete`                  – Cancel pending delete
 
 #### Search & Filters
 - `search <substring>`            – Search by name (case-insensitive)
@@ -102,12 +104,12 @@ Use the input field to enter commands (see below).
 
 #### Bulk Operations
 - `toggle <id>`                   – Toggle a node and all its children between done/undone
-- `clearall mem`                  – Clear all in-memory nodes (requires confirmation)
-- `clearall file`                 – Delete saved data file (requires confirmation)
-- `clearall both`                 – Clear memory and delete file (requires confirmation)
-- `abort clearall`                – Cancel pending `clearall`
+- `clearall`                      – Clear all in-memory nodes (requires confirmation)
+- `save`                          - Save project tree manually.
+
 
 #### Config Operations
+- `config <setting> <on/off>`     - Turn auto-save / confirmation requests / logging on and off.          * NEW *
 - `autosave <on/off>`             - Turn auto-save on and off.
 
 ---
@@ -118,11 +120,18 @@ Use the input field to enter commands (see below).
 - `sample` → `table` → `delete 01.01` → `confirm delete 01.01` → `table`
 - `sample` → `table` → `toggle 01.01` → `table`
 - `search plan` → list all nodes with “plan” in the name
-- `clearall both` → remove all data after confirmation
+- `clearall` → remove all data after confirmation
 
 ---
 
 ## 📜 Version History
+
+### v0.1.0a5 - 2025-08-22
+- Introduced the new **Command Registry** system: all commands are now declaratively defined in `registry.py`.
+- Added `command_factory.py` to parse raw input into a `Command` object with params, handlers and messages.
+- Refactored every command using the registry, with full support for positionals, options and defaults.
+- Added support for command-specific usage messages resolved through the registry.
+- Added 'config' command to switch settings (autosave, confirmation requests and logging).
 
 ### v0.1.0a4 – 2025-08-19
 - Introduced layered and leveled logging and internal messaging system with buffer prepared for lcalization.

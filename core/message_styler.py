@@ -161,7 +161,7 @@ class FormatterFuncs:
     help: Any
 
 
-# ---------- Styling helpers (no external defaults) ----------
+# ---------- Styling helpers ----------
 
 # Default body color per level (used only when the message does not supply a color
 # and the caller did not pass body_style)

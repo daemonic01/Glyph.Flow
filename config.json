@@ -1,11 +1,23 @@
 {
-    "version": "0.1.0a3",
+    "version": "0.1.0a5",
     "paths": {
         "data": "data/node_data.json",
         "help": "assets/help.txt",
         "messages": "loc/en/messages.json",
         "syslog": "logs/app.log"
     },
+    "default_schema": [
+        "Project",
+        "Phase",
+        "Task",
+        "Subtask"
+    ],
+    "custom_schema": [
+        "Project",
+        "Phase",
+        "Task",
+        "Subtask"
+    ],
     "logging": true,
     "log": {
         "rotate": {
@@ -14,5 +26,6 @@
         }
     },
     "autosave": true,
+    "assume_yes": false,
     "command_history_maxlen": 50
 }

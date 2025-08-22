@@ -31,6 +31,5 @@ class CommandHistory:
         if self._cursor < len(self._items) - 1:
             self._cursor += 1
             return self._items[self._cursor]
-        # end: “üres” input
         self._cursor = len(self._items)
         return ""

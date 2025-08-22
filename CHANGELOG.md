@@ -2,13 +2,38 @@
 
 ---
 
+## [v0.1.0a5] – 2025-08-22
+
+### ✨ Added
+- Introduced the new **Command Registry** system: all commands are now declaratively defined in `registry.py`.
+- Added `command_factory.py` to parse raw input into a `Command` object with params, handlers and messages.
+- Refactored every command using the registry, with full support for positionals, options and defaults.
+- Added support for command-specific usage messages resolved through the registry.
+- Added 'config' command to switch settings (autosave, confirmation requests and logging).
+
+### 🔧 Improved
+- **Massive cleanup**: `app.py` reduced from ~630 lines to ~112 lines; command dispatch fully separated from UI. Ready for TUI development.
+- Unified error handling and logging via registry-driven command specs.
+- Autosave and mutation handling standardized at command-level.
+- Command addition now requires only a registry entry + handler function.
+- `clearall` command refactor: no parameters, delete all data
+
+### 🐛 Known Limitations
+- No undo/redo system.
+- Manual command input only – no TUI or keybindings yet
+- No export/import feature.
+- The `create` command recommends to create None if an attempt is made to create an element at a level deeper than the existing scheme.
+- The system tends to generate IDs incorrectly when generating a sample tree. (id counter issue)
+
+---
+
 ## [v0.1.0a4] – 2025-08-19
 
 ### ✨ Added
-- Introduced layered and leveled logging and internal messaging system
-- All commands in `app.py` migrated to use the new logging system (except view outputs)
-- Added `CommandHistory` module with arrow-key navigation
-- Foundation for upcoming Command Registry system
+- Introduced layered and leveled logging and internal messaging system with buffer prepared for lcalization.
+- All commands in `app.py` migrated to use the new logging system (except view outputs).
+- Added `CommandHistory` module with arrow-key navigation.
+- Foundation for upcoming Command Registry system.
 
 ### 🔧 Improved
 - More efficient internal and external log management.
@@ -16,8 +41,6 @@
 
 ### 🐛 Known Limitations
 - No undo/redo system
-- No system message buffer/logging
-- No localized messaging system.
 - Manual command input only – no TUI or keybindings yet
 - No export/import feature.
 
