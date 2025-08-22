@@ -1,4 +1,5 @@
 <img width="1345" height="800" alt="image" src="https://github.com/user-attachments/assets/a3caaab1-a0ce-4cb6-9b83-448e7679662f" />
+<img width="1902" height="970" alt="screenshot_2025-08-22 225930" src="https://github.com/user-attachments/assets/04fd38a7-4846-4e66-a5de-3602756337bb" />
 
 
 # Glyph.Flow
