@@ -55,6 +55,7 @@ This is an early prototype (v0.1.0a5), mainly focused on backend data modeling a
   - Undo support
   - Enhanced error handling
   - TUI Features, Dashboard and statistics
+  - Packaging
 
 ---
 
@@ -75,7 +76,9 @@ Install dependencies:
 
 ```bash
 pip install textual rich
-python app.py
+git clone https://github.com/daemonic01/Glyph.Flow.git
+cd Glyph.Flow
+python main.py
 ```
 
 Use the input field to enter commands (see below).
