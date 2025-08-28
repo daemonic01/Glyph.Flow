@@ -2,11 +2,20 @@
 from core.node import Node
 
 def table_handler(ctx):
-        """Render a table view of all nodes in the tree using Rich Table."""
+        """
+        Handler for the 'table' command.
+
+        Renders the entire node tree into a Rich Table and writes it into
+        the app's output widget. Each node (root + children) is represented
+        as a row with metadata.
+
+        Args:
+            ctx: Application context (must provide ctx.nodes and ctx.app.output_widget).
+        """
         from rich.table import Table
 
-        table = Table(show_header=True, header_style="bold cyan")
-        table.add_column("ID", style="bold", width=12)
+        table = Table(show_header=True, header_style="bold #9c1717", border_style="bold #9c1717")
+        table.add_column("ID", style="white", width=12)
         table.add_column("Name", style="white", no_wrap=True)
         table.add_column("Type", style="cyan", width=10)
         table.add_column("Created", style="white", width=12)
@@ -18,11 +27,19 @@ def table_handler(ctx):
         for root in ctx.nodes:
             _add_node_to_table(root, table)
 
-        ctx.app.log_widget.write("[bold cyan]Table view:")
-        ctx.app.log_widget.write(table)
+        
+        ctx.app.output_widget.write("[bold #9c1717]\nTable view:")
+        ctx.app.output_widget.write(table)
+        
 
 def _add_node_to_table(node: Node, table):
-    """Helper function to add nodes/rows to tables."""
+    """
+    Helper: Add a node (and all its descendants) as rows into the table.
+
+    Args:
+        node (Node): The node to add.
+        table (rich.table.Table): The Rich table to populate.
+    """
     status = "[X]" if node.completed else "[ ]"
     table.add_row(
         node.id,

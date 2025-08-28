@@ -9,33 +9,34 @@ def sample_handler(ctx) -> CommandResult:
     """Create a predefined sample tree structure for testing and demonstration.
 
     Returns:
-        List[Node]: A list containing a single root project with nested phases, tasks, and subtasks.
+        CommandResult: outcome of the operation with appropriate code and params.
     """
     try:
-        project = Node(name="Glyph.Flow", type="Project", short_desc="TUI workflow manager")
 
-        
-        phase1 = Node(name="Planning", type="Phase", short_desc="Design and requirements")
-        project.add_child(phase1)
+        # ROOT
+        root = Node(name="Glyph.Flow", type="Project")
+        root.id = Node.next_free_root_id(ctx.app.nodes)
+        ctx.app.nodes.append(root)
 
-        task1 = Node(name="Define structure", type="Task", short_desc="Decide on Node model")
-        phase1.add_child(task1)
+        # Level 1
+        planning = Node(name="Planning", type="Phase")
+        impl     = Node(name="Implementation", type="Phase")
+        tests    = Node(name="Test with sample data", type="Phase")
 
-        subtask1 = Node(name="Add progress support", type="Subtask", short_desc="Progress calculation logic")
-        task1.add_child(subtask1) 
+        root.add_child(planning)
+        root.add_child(impl)
+        root.add_child(tests)
 
-        phase2 = Node(name="Implementation", type="Phase", short_desc="Code the core system")
-        project.add_child(phase2)
+        # level 2
+        define  = Node(name="Define structure", type="Task")
+        addprog = Node(name="Add progress support", type="Task")
 
-        task2 = Node(name="Write save/load", type="Task", short_desc="Create JSON I/O")
-        phase2.add_child(task2)
+        planning.add_child(define)
+        planning.add_child(addprog)
 
-        subtask2 = Node(name="Test with sample data", type="Subtask", short_desc="Load from file and inspect")
-        task2.add_child(subtask2)
-
-        ctx.config["custom_schema"] = ctx.config["default_schema"]
-        ctx.nodes.append(project)
-        return CommandResult("success")
+        save_load = Node(name="Write save/load", type="Task")
+        impl.add_child(save_load)
+        return CommandResult("success", outcome=True)
     
     except SampleTreeError as e:
         ctx.log.error(str(e))

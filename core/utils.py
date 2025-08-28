@@ -14,21 +14,3 @@ def get_level(node: Node) -> int:
         node = node.parent
         level += 1
     return level
-
-
-def toggle_all(node: Node):
-    """Toggle the completion state of a node and certain descendants.
-
-    Descendants are toggled only if they matched the node's original state,
-    preserving intentional differences deeper in the hierarchy.
-    """
-    old_state = node.completed
-    new_state = not old_state
-
-    def _toggle_recursive(current: Node):
-        if current.completed == old_state:
-            current.completed = new_state
-            for child in current.children:
-                _toggle_recursive(child)
-
-    _toggle_recursive(node)

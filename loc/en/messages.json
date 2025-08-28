@@ -33,13 +33,31 @@
       "level": "SUCCESS",
       "badge": "OK",
       "color": "green",
-      "text": "Autosave done! Config saved."
+      "text": "Autosave done!"
     },
     "autosave_failed": {
       "level": "ERROR",
       "badge": "ERROR",
       "color": "red",
       "text": "Autosave failed: {error}"
+    },
+    "config_save_done": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Config saved."
+    },
+    "config_save_failed": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Config save failed: {error}"
+    },
+    "unexpected_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Unexpected error! Please create a new issue in the project's repository on GitHub! This would help me a lot. Thank you."
     }
   },
   "config": {
@@ -86,7 +104,13 @@
       "level": "SUCCESS",
       "badge": "OK",
       "color": "green",
-      "text": "Manual save completed!."
+      "text": "Manual save completed!"
+    },
+    "manual_save_failed":{
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Manual save failed! Error: {error}"
     },
     "save_success": {
       "level": "SUCCESS",
@@ -198,6 +222,12 @@
       "badge": "ERROR",
       "color": "red",
       "text": "Root node must be of type '{expected}', not '{type}'"
+    },
+    "tree_level_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Cannot add a child under '{parent_type}' ({parent_id}) because it is the last level of the active schema."
     },
     "node_not_found": {
       "level": "ERROR",

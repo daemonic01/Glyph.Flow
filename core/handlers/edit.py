@@ -11,16 +11,32 @@ def edit_handler(
     deadline: Optional[str] = None,
 ) -> CommandResult:
     """
-    Edit a node's fields by ID.
-    Returns codes:
-      - "not_found"
-      - "edit_done"
-      - "edit_no_change"
+    Handler for the 'edit' command.
+
+    Updates fields of a node identified by ID. Any combination of fields
+    can be updated in a single call. If no new values are provided, no
+    changes are made.
+
+    Behavior:
+        - If node not found → returns code="not_found".
+        - If one or more fields updated → returns code="edit_done".
+        - If no changes applied → returns code="edit_no_change".
+
+    Args:
+        ctx: Application context (must contain ctx.nodes).
+        id (str | None): ID of the node to edit.
+        name (str | None): New name for the node.
+        short_desc (str | None): New short description.
+        full_desc (str | None): New full description.
+        deadline (str | None): New deadline string.
+
+    Returns:
+        CommandResult: outcome of the edit operation with appropriate code and params.
     """
 
     node, _ = _find_node_and_parent(ctx, id)
     if not node:
-        return CommandResult(code="not_found", params={"id": id})
+        return CommandResult(code="not_found", params={"id": id}, outcome=False)
 
     changes = []
 
@@ -39,15 +55,25 @@ def edit_handler(
 
     if changes:
         info = ", ".join(changes)
-        return CommandResult(code="edit_done", params={"id": node.id, "info": info})
+        return CommandResult(code="edit_done", params={"id": node.id, "info": info}, outcome=True)
 
-    return CommandResult(code="edit_no_change", params={"id": node.id})
+    return CommandResult(code="edit_no_change", params={"id": node.id}, outcome=False)
 
 
-# --- helpers -----------------------------------------------------------------
+
 
 def _find_node_and_parent(ctx, target_id: str) -> Tuple[Optional[object], Optional[object]]:
-    """Depth-first search for node and its parent among roots in ctx.app.nodes."""
+    """
+    Depth-first search for a node and its parent among ctx.nodes.
+
+    Args:
+        ctx: Application context (must contain ctx.nodes list).
+        target_id (str): Node ID to search for.
+
+    Returns:
+        tuple(Node|None, Node|None):
+            (target node, parent node) or (None, None) if not found.
+    """
     if not target_id:
         return None, None
 
@@ -62,6 +88,16 @@ def _find_node_and_parent(ctx, target_id: str) -> Tuple[Optional[object], Option
 
 
 def _dfs_find_with_parent(node, target_id: str) -> Tuple[Optional[object], Optional[object]]:
+    """
+    Recursive DFS helper to locate a node and its parent.
+
+    Args:
+        node (Node): Current node in traversal.
+        target_id (str): Node ID to search for.
+
+    Returns:
+        tuple(Node|None, Node|None): (found node, parent node) or (None, None).
+    """
     for child in getattr(node, "children", []):
         if getattr(child, "id", None) == target_id:
             return child, node

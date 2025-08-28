@@ -42,17 +42,9 @@ def load_node_tree(filename: str = str(DATA_PATH)) -> List[Node]:
         data = json.load(f)
         nodes = [Node.from_dict(entry) for entry in data]
 
-        if nodes:
-            max_root_id = max(int(n.id) for n in nodes if n.parent is None)
-            Node._root_counter = max_root_id + 1
-        else:
-            Node._root_counter = 1
+        Node.relabel_missing_ids(nodes)
 
-        log.key("file.load_success", filename=filename)
         return nodes
-
-
-
 
 
 

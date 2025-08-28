@@ -16,6 +16,15 @@ FALSE_WORDS = {"off", "false", "no", "n", "0"}
 
 
 def _parse_bool(value: str) -> Optional[bool]:
+    """
+    Convert a string to a boolean.
+
+    Args:
+        value (str): User-provided input (e.g. "on", "off", "true", "false").
+
+    Returns:
+        bool | None: True or False if recognized, None otherwise.
+    """
     v = (value or "").strip().lower()
     if v in TRUE_WORDS:
         return True
@@ -26,28 +35,38 @@ def _parse_bool(value: str) -> Optional[bool]:
 
 def config_handler(ctx, *, setting: Optional[str] = None, value: Optional[str] = None) -> CommandResult:
     """
-    Set a boolean config value: config <setting> <on|off>
-    Supported: autosave, assume_yes, logging  (alias: assume-yes, log)
+    Handler for the 'config' command.
 
-    Returns codes:
-      - unknown_key
-      - invalid_value
-      - set_success
-      - no_change
+    Sets a boolean configuration value in the app's config and persists it
+    to disk. Only supports predefined keys.
+
+    Usage:
+        config <setting> <on|off>
+
+    Supported keys:
+        - autosave
+        - assume_yes (alias: assume-yes)
+        - logging (alias: log)
+
+    Return codes:
+        - "unknown_key"  → setting not supported
+        - "invalid_value" → value not recognized as boolean
+        - "no_change" → already set to given value
+        - "set_success" → updated successfully
+        - "error" → saving to file failed
     """
-
 
     key_in = setting.strip().lower()
     cfg_key = SUPPORTED_KEYS.get(key_in)
     if not cfg_key:
-        return CommandResult(code="unknown_key", params={"setting": setting})
+        return CommandResult(code="unknown_key", params={"setting": setting}, outcome=False)
 
 
     b = _parse_bool(value)
     if b is None:
-        return CommandResult(code="invalid_value", params={"k": key_in})
+        return CommandResult(code="invalid_value", params={"k": key_in}, outcome=False)
 
-
+    # Ensure config dict exists
     cfg = getattr(ctx.app, "config", None)
     if cfg is None:
 
@@ -58,18 +77,18 @@ def config_handler(ctx, *, setting: Optional[str] = None, value: Optional[str] =
 
 
     if current is not None and bool(current) == b:
-        return CommandResult(code="no_change", params={"setting": cfg_key, "value": "ON" if b else "OFF"})
+        return CommandResult(code="no_change", params={"setting": cfg_key, "value": "ON" if b else "OFF"}, outcome=False)
 
-
+    # Update and persist
     cfg[cfg_key] = b
     try:
         save_config(cfg)
     except Exception as e:
 
-        return CommandResult(code="error", params={"error": str(e)})
+        return CommandResult(code="error", params={"error": str(e)}, outcome=False)
 
     return CommandResult(
         code="set_success",
         params={"setting": cfg_key, "value": "ON" if b else "OFF"},
-        payload={"setting": cfg_key, "value": b},
+        payload={"setting": cfg_key, "value": b}, outcome=True
     )

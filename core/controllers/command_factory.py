@@ -1,4 +1,3 @@
-# core/controls/cmd_factory.py
 from __future__ import annotations
 
 import shlex
@@ -12,12 +11,21 @@ from core.errors.command_errors import (
 from .registry import COMMANDS
 
 
-# ---- helpers ---------------------------------------------------------------
+
 
 def _resolve_import(path: str):
     """
-    Resolve 'pkg.mod.func' -> callable object.
-    Raises ParseError if cannot be resolved.
+    Resolve a string path like 'pkg.module.func' into a Python callable.
+
+    Args:
+        path (str): Import path in dot-notation.
+
+    Returns:
+        Callable: The resolved function or object.
+
+    Raises:
+        ParseError: If the path is invalid, module cannot be imported,
+                    or the attribute does not exist.
     """
     try:
         mod_path, attr = path.rsplit(".", 1)
@@ -34,8 +42,17 @@ def _resolve_import(path: str):
     return obj
 
 
+
 def _find_spec(name: str) -> Optional[dict]:
-    """Find spec by name or alias in REGISTRY."""
+    """
+    Find a command spec in the registry by name or alias.
+
+    Args:
+        name (str): Command name or alias.
+
+    Returns:
+        dict | None: Command spec if found, else None.
+    """
     spec = COMMANDS.get(name)
     if spec:
         return spec
@@ -46,29 +63,55 @@ def _find_spec(name: str) -> Optional[dict]:
             return s
     return None
 
+
+
 def _strip_variadic_marker(key: str) -> str:
+    """
+    Remove variadic marker ('+' or '*') from the end of a key.
+
+    Example:
+        'items+' -> 'items'
+        'args*'  -> 'args'
+    """
+
     return key[:-1] if key and key[-1] in ("+", "*") else key
+
+
 
 def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
     """
-    Minimal schema-based parser.
-    - None / [] / {}  -> {}
-    - list -> positional names (supports variadic last positional: 'name+' or 'name*')
-    - dict -> {
-        positionals: [...],            # supports variadic last positional: 'name+' or 'name*'
-        options: {"--flag": "param" | {"to":"param","flag":true}},
-        defaults: {...}
-      }
+    Parse arguments based on a schema definition.
+
+    Schema forms:
+      - None / [] / {}  -> {}
+      - list -> positional params (supports variadic last positional: 'arg+' or 'arg*')
+      - dict -> {
+            positionals: [...],            # supports variadic last positional
+            options: {"--flag": "param" | {"to":"param","flag":true}},
+            defaults: {...}
+        }
+
+    Args:
+        argv (list[str]): Command-line arguments (already tokenized).
+        schema (Any): Schema definition (list or dict).
+
+    Returns:
+        dict: Parsed parameters.
+
+    Raises:
+        ParseError: On unknown tokens, missing values, or unsupported schema.
     """
+
     if not schema:
         return {}
 
-    # --- list schema ---------------------------------------------------------
+    # --- LIST SCHEMA (simple positionals) ---
     if isinstance(schema, list):
         pos_keys_raw: List[str] = schema
         variadic_key: str | None = None
         variadic_kind: str | None = None  # '+' or '*'
 
+        # detect variadic last positional
         if pos_keys_raw:
             last = pos_keys_raw[-1]
             if last and last[-1] in ("+", "*"):
@@ -79,6 +122,7 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
         sanitized = [_strip_variadic_marker(k) for k in pos_keys_raw]
         params: Dict[str, Any] = {k: None for k in sanitized}
 
+        # parse fixed positionals
         i = 0
         fixed_upto = len(pos_keys_raw) - 1 if variadic_key else len(pos_keys_raw)
         for idx in range(fixed_upto):
@@ -87,6 +131,7 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
                 params[key] = argv[i]
                 i += 1
 
+        # parse variadic positional (collects multiple values)
         if variadic_key:
             values: List[str] = []
             while i < len(argv) and not argv[i].startswith("-"):
@@ -98,13 +143,13 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
             raise ParseError(f"Unknown token: {argv[i]}")
         return params
 
-    # --- dict schema ---------------------------------------------------------
+    # --- DICT SCHEMA (positionals + options + defaults) ---
     if isinstance(schema, dict):
         pos_keys_raw: List[str] = (schema.get("positionals", []) or [])
         opt_map: Dict[str, Any] = (schema.get("options", {}) or {})
         defaults: Dict[str, Any] = dict(schema.get("defaults", {}) or {})
 
-
+        # detect variadic last positional
         variadic_key: str | None = None
         variadic_kind: str | None = None  # '+' or '*'
         if pos_keys_raw:
@@ -118,6 +163,7 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
         params: Dict[str, Any] = {k: None for k in sanitized_pos}
         params.update(defaults)
 
+        # parse fixed positionals
         i = 0
         fixed_upto = len(pos_keys_raw) - 1 if variadic_key else len(pos_keys_raw)
 
@@ -130,27 +176,28 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
                 
                 pass
 
-
+        # parse variadic positional
         if variadic_key:
             values: List[str] = []
             while i < len(argv) and not argv[i].startswith("-"):
                 values.append(argv[i]); i += 1
             params[variadic_key] = values if (variadic_kind == "+" and values) or variadic_kind == "*" else None
 
+        # parse options
         while i < len(argv):
             tok = argv[i]
             spec = opt_map.get(tok)
             if spec is None:
                 raise ParseError(f"Unknown token: {tok}")
 
-
+            # boolean flag option
             if isinstance(spec, dict) and spec.get("flag"):
                 dest = spec.get("to") or spec.get("name") or tok.lstrip("-")
                 params[dest] = True
                 i += 1
                 continue
 
-
+            # key-value option
             dest = spec if isinstance(spec, str) else (spec.get("to") or spec.get("name"))
             if i + 1 >= len(argv) or argv[i + 1].startswith("-"):
                 raise ParseError(f"Missing value for option: {tok}")
@@ -162,18 +209,30 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
     raise ParseError("Unsupported schema type for params")
 
 
-# ---- public API ------------------------------------------------------------
+
 
 def summon(raw: str, ctx) -> Command:
     """
-    Turn a raw input line into a ready-to-run Command:
-      - tokenizes raw
-      - looks up blueprint (spec) from REGISTRY (by name or alias)
-      - parses argv using the blueprint 'params' schema
-      - resolves handler/before/after import paths (strings) to callables
-      - returns Command(...) (INIT fázisban van ekkor)
+    Turn a raw input line into a ready-to-run Command.
+
+    Steps:
+      1. Tokenize input with shlex.
+      2. Find command spec by name/alias from REGISTRY.
+      3. Parse argv using the spec's schema.
+      4. Resolve handler import path to callable.
+      5. Build Command object in INIT state.
+
+    Args:
+        raw (str): Raw input line from user.
+        ctx: Application context.
+
+    Returns:
+        Command | None: Ready-to-run Command, or None if help was requested.
+
     Raises:
-      - ParseError, UnknownCommandError, ValidationError  (INIT fázis)
+        ParseError: On invalid syntax, missing handler path, or schema errors.
+        UnknownCommandError: If command not found.
+        ValidationError: If spec requires data but no data is loaded.
     """
     parts = shlex.split(raw)
     if not parts:
@@ -181,10 +240,12 @@ def summon(raw: str, ctx) -> Command:
 
     name, argv = parts[0], parts[1:]
 
+    # lookup command spec
     spec = _find_spec(name)
     if not spec:
         raise UnknownCommandError(name)
     
+    # show usage/help if requested
     wants_help = (len(argv) == 1 and argv[0] in ("-h", "--help"))
     if (spec.get("params") and not argv) or wants_help:
         usage = spec.get("usage") or name
@@ -194,26 +255,22 @@ def summon(raw: str, ctx) -> Command:
             ctx.log.info(f"Usage: {usage}")
         return None
 
+    # enforce data requirement
     if spec.get("require_data") and not ctx.nodes:
         raise ValidationError("No data loaded.")
 
+    # parse arguments
     params = _parse_by_schema(argv, spec.get("params"))
 
+    # resolve handler
     handler_path = spec.get("handler")
     if not handler_path:
         raise ParseError(f"Missing handler path for command '{name}'")
     handler = _resolve_import(handler_path)
+    
     mutate = spec.get("mutate", True)
+    mutate_config = spec.get("mutate_config", True)
     destructive = bool(spec.get("destructive", False))
-
-    def _resolve_maybe_list(x):
-        if not x:
-            return []
-        if isinstance(x, str):
-            return [_resolve_import(x)]
-        if isinstance(x, (list, tuple)):
-            return [_resolve_import(p) if isinstance(p, str) else p for p in x]
-        return [x]
 
     spec = dict(spec)
 
@@ -226,5 +283,6 @@ def summon(raw: str, ctx) -> Command:
         params=params,
         handler=handler,
         mutate=mutate,
+        mutate_config=mutate_config,
         destructive=destructive
     )

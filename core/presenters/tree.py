@@ -2,25 +2,46 @@
 from core.node import Node
 
 def tree_handler(ctx):
-    ctx.app.log_widget.write("[bold cyan]Tree view:")
+    """
+    Handler for the 'tree' command.
+
+    Renders the current node tree in a simple indented view, with
+    checkboxes for completion state and color-coded levels.
+    Example:
+
+        [ ] Project A (Project, ID = 01)
+          [X] Phase 1 (Phase, ID = 01.01)
+            [ ] Task A (Task, ID = 01.01.01)
+
+    Args:
+        ctx: Application context (must provide ctx.app.output_widget and ctx.nodes).
+    """
+    ctx.app.output_widget.write("[bold white]\nTree view:")
     for n in ctx.app.nodes:
         print_node_recursive(ctx=ctx, node=n)
 
 
 def print_node_recursive(ctx, node: Node, indent: int = 0):
-        """Print the tree view recursively in indented format with optional delay."""
-        status = "[X]" if node.completed else "[ ]"
+    """
+    Recursive helper to print a node and its children in an indented tree view.
 
-        if indent == 0:
-            color = "#2B9995"
-        elif indent == 1:
-            color = "#2AA7A2"
-        elif indent == 2:
-            color = "#71DDD9"
-        else:
-            color = "#C9F0EF"
-        
-        line = f"[{color}]{status} {node.name} ({node.type}, ID = {node.id})[/{color}]"
-        ctx.app.log_widget.write("  " * indent + line)
-        for child in node.children:
-            print_node_recursive(ctx, node = child, indent = indent + 1)
+    Args:
+        ctx: Application context (must provide ctx.app.output_widget).
+        node (Node): Current node to print.
+        indent (int): Indentation level (0 for root).
+    """
+    status = "[X]" if node.completed else "[ ]"
+
+    if indent == 0:
+        color = "#92530A"
+    elif indent == 1:
+        color = "#DB9B51"
+    elif indent == 2:
+        color = "#FDC483"
+    else:
+        color = "#FFE1BF"
+    
+    line = f"[{color}]{status} {node.name} ({node.type}, ID = {node.id})[/{color}]"
+    ctx.app.output_widget.write("  " * indent + line)
+    for child in node.children:
+        print_node_recursive(ctx, node = child, indent = indent + 1)

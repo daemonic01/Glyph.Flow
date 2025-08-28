@@ -1,12 +1,12 @@
 RichLog {
     width: 100%;
-    height: 1fr;
+    height: auto;
     padding: 0;
     margin: 0;
     border: none;
     background: $panel 10%;
     scrollbar-size: 0 1;
-    scrollbar-color: #541A1A;
+    scrollbar-color: #851b1bff; 
     scrollbar-color-hover: #6E2121;
     scrollbar-color-active: #6E2121;
 }
@@ -24,6 +24,86 @@ Vertical {
     content-align: center middle;
     height: 100%;
     width: 100%;
-    border: round #541A1A;
+    border: round #851b1bff;
     margin-left: 1;
+}
+
+#header {
+    width: 100%;
+    height: 9;
+    background: #851b1bff;
+    padding: 0;
+    margin: 0;
+    border: none;
+    align: center top;
+    content-align: center top;
+    text-align: center;
+}
+
+#gf-logo {
+    width: 50%;
+    height: 9;
+    background: #851b1bff;
+    padding: 0;
+    margin: 0;
+    border: none;
+    align: center top;
+    content-align: center top;
+    text-align: center;
+}
+
+
+#info-box {
+    width: 25%;
+    height: 9;
+    background: #851b1bff;
+    color: #000000ff;
+    text-style: bold;
+    padding: 1;
+    margin: 0;
+    border: none;
+    align: left top;
+    content-align: center top;
+    text-align: center;
+}
+
+InfoLabel {
+    background: #851b1bff;
+    color: #1f1f1fff;
+}
+
+Rule {
+    background: #1f1f1fff;
+    color: #851b1bff;
+    margin: 0;
+    padding: 0;
+}
+
+
+#log {
+    dock: left;
+    width: 50%;
+    height: 1fr;
+    padding: 0;
+    margin: 0;
+    border: round #851b1bff;
+    background: $panel 10%;
+    scrollbar-size: 0 1;
+    scrollbar-color: #851b1bff;
+    scrollbar-color-hover: #6E2121;
+    scrollbar-color-active: #6E2121;
+}
+
+#output-log {
+    dock: right;
+    width: 50%;
+    height: 1fr;
+    padding: 1;
+    margin: 0;
+    border: round #851b1bff;
+    background: $panel 10%;
+    scrollbar-size: 0 1;
+    scrollbar-color: #851b1bff;
+    scrollbar-color-hover: #6E2121;
+    scrollbar-color-active: #6E2121;
 }

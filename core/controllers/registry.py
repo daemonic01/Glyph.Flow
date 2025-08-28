@@ -10,9 +10,25 @@ COMMANDS = {
         "binding": "h",
         "require_data": False,
         "mutate": False,
+        "mutate_config": False,
         "destructive": False,
         "params": [],
         "handler": "core.presenters.help.help_handler",
+        "messages": None
+    },
+    "quit": {
+        "type": "default",
+        "aliases": ["q"],
+        "description": "Quit Glyph.Flow.",
+        "usage": "quit",
+        "handler"
+        "binding": "q",
+        "require_data": False,
+        "mutate": False,
+        "mutate_config": False,
+        "destructive": False,
+        "params": [],
+        "handler": "core.services.quit.quit_handler",
         "messages": None
     },
     "ls": {
@@ -23,6 +39,7 @@ COMMANDS = {
         "binding": None,
         "require_data": True,
         "mutate": False,
+        "mutate_config": False,
         "destructive": False,
         "params": [],
         "handler": "core.presenters.ls.ls_handler",
@@ -36,6 +53,7 @@ COMMANDS = {
         "binding": None,
         "require_data": True,
         "mutate": False,
+        "mutate_config": False,
         "destructive": False,
         "params": [],
         "handler": "core.presenters.tree.tree_handler",
@@ -49,6 +67,7 @@ COMMANDS = {
         "binding": None,
         "require_data": True,
         "mutate": False,
+        "mutate_config": False,
         "destructive": False,
         "params": [],
         "handler": "core.presenters.ascii.ascii_handler",
@@ -62,6 +81,7 @@ COMMANDS = {
         "binding": None,
         "require_data": True,
         "mutate": False,
+        "mutate_config": False,
         "destructive": False,
         "params": [],
         "handler": "core.presenters.table.table_handler",
@@ -77,6 +97,7 @@ COMMANDS = {
         "binding": None,
         "require_data": False,
         "mutate": False,
+        "mutate_config": False,
         "destructive": False,
         "params": [],
         "handler": "core.services.clear_terminal.clear_handler",
@@ -92,6 +113,7 @@ COMMANDS = {
         "binding": None,
         "require_data": False,
         "mutate": True,
+        "mutate_config": False,
         "destructive": False,
         "params": [],
         "handler": "core.handlers.sample.sample_handler",
@@ -108,6 +130,7 @@ COMMANDS = {
         "binding": None,
         "require_data": False,
         "mutate": False,
+        "mutate_config": False,
         "destructive": False,
         "params": [],
         "handler": "core.services.save.save_handler",
@@ -125,6 +148,7 @@ COMMANDS = {
         "binding": None,
         "require_data": False,
         "mutate": True,
+        "mutate_config": False,
         "destructive": False,
         "params": {
             "positionals": ["type", "name"],
@@ -145,7 +169,8 @@ COMMANDS = {
         "messages": {
             "success":                  "node.created_node",
             "parent_not_found_error":   "node.create_parent_not_found",
-            "root_type_error":          "node.create_root_node_type_error"
+            "root_type_error":          "node.create_root_node_type_error",
+            "tree_level_error":         "node.tree_level_error"
         }
     },
 
@@ -153,10 +178,11 @@ COMMANDS = {
         "type": "default",
         "aliases": [],
         "description": "Create or change tree schema.",
-        "usage": "schema Project Phase Task Subtask",
+        "usage": "schema <level1> <level2> ...",
         "binding": None,
         "require_data": False,
         "mutate": True,
+        "mutate_config": True,
         "destructive": False,
         "params": {
             "positionals": ["hierarchy+"],
@@ -187,6 +213,7 @@ COMMANDS = {
         "binding": None,
         "require_data": True,
         "mutate": True,
+        "mutate_config": False,
         "destructive": True,
         "params": {
             "positionals": ["id"],
@@ -208,6 +235,7 @@ COMMANDS = {
         "binding": None,
         "require_data": True,
         "mutate": True,
+        "mutate_config": False,
         "destructive": False,
         "params": {
             "positionals": ["id"],
@@ -239,6 +267,7 @@ COMMANDS = {
         "binding": None,
         "require_data": False,
         "mutate": False,
+        "mutate_config": False,
         "destructive": False,
         "params": {
             "positionals": ["first", "rest*"],
@@ -252,8 +281,7 @@ COMMANDS = {
         "handler": "core.handlers.search.search_handler",
         "messages": {
             "no_data":            "file.no_data",
-            "search_no_matches":  "node.search_no_matches",
-            "search_results":     "node.search_results"
+            "search_no_matches":  "node.search_no_matches"
         }
     },
     "toggle": {
@@ -264,6 +292,7 @@ COMMANDS = {
         "binding": None,
         "require_data": True,
         "mutate": True,
+        "mutate_config": False,
         "destructive": False,
         "params": {
             "positionals": ["id"],
@@ -285,6 +314,7 @@ COMMANDS = {
         "binding": None,
         "require_data": True,
         "mutate": True,
+        "mutate_config": False,
         "destructive": True,
         "params": {},
         "handler": "core.handlers.clearall.clearall_handler",
@@ -300,7 +330,8 @@ COMMANDS = {
         "usage": "config <setting> <on|off>",
         "binding": None,
         "require_data": False,
-        "mutate": True,
+        "mutate": False,
+        "mutate_config": True,
         "destructive": False,
         "params": {
             "positionals": ["setting", "value"],

@@ -7,6 +7,11 @@ from core.errors.command_errors import (
 )
 
 class CommandState(Enum):
+    """
+    Represents the lifecycle state of a Command.
+    A Command transitions through INIT → EXECUTION → TELL → DONE,
+    or into one of the error/failed states.
+    """
 
     INIT = auto()
     EXECUTION = auto()
@@ -25,7 +30,29 @@ _PHASE_ERR = {
 }
 
 class Command:
-    def __init__(self, ctx, name, raw, spec, params, handler, mutate, destructive):
+    """
+    Encapsulates the full lifecycle of a user command.
+
+    - Created via `command_factory.summon()`.
+    - Executes a registered handler with given parameters.
+    - Handles confirmation for destructive commands.
+    - Logs results and errors via the `log` system.
+    - Performs autosave if configured and the command mutates data.
+    """
+
+    def __init__(self, ctx, name, raw, spec, params, handler, mutate, mutate_config, destructive):
+        """
+        Args:
+            ctx: Application context (services, log, config, nodes, etc.)
+            name: Name of the command (e.g. "create")
+            raw: Raw input string from the user
+            spec: Command spec dict from registry
+            params: Parsed parameters (dict) passed to handler
+            handler: Callable handler for this command
+            mutate: Whether command mutates data (for autosave)
+            destructive: Whether command is destructive (requires confirm)
+        """
+
         self.ctx = ctx
         self.name = name
         self.raw = raw
@@ -34,11 +61,25 @@ class Command:
         self.handler = handler
         self.state = CommandState.INIT
         self.mutate = mutate
+        self.mutate_config = mutate_config
         self.destructive = destructive
         self.paused = False
         self._confirmed = False
 
     def _tell(self, result: Any, error: Optional[Exception] = None) -> None:
+        """
+        Handle reporting/logging of the command outcome.
+
+        Args:
+            result: Handler return value (CommandResult)
+            error: Exception to report (optional)
+
+        Behavior:
+            - If error: log appropriate error key or fallback.
+            - If result is CommandResult: log messages based on result code.
+            - Special case: render search results in table format.
+        """
+
         msgs = (self.spec.get("messages") or {})
         if error:
             self.ctx.log.debug(error)
@@ -63,18 +104,26 @@ class Command:
                         return
                 except Exception as _:
                     pass
-        
-        if "success" in msgs:
-            pass
 
 
     def execute(self) -> Any:
+        """
+        Run the command lifecycle:
+        - confirm if destructive
+        - execute handler
+        - tell/log result
+        - perform autosave if needed
+
+        Returns:
+            CommandResult or None
+        """
+
         if self.destructive and not self.ctx.config["assume_yes"] and not self._confirmed:
             self.ctx.confirm.request(self, prompt=f"Execute '{self.name}'? This cannot be undone. (y/n)")
             self.paused = True
             return
 
-        # EXECUTION
+        # [EXECUTION]
         self.state = CommandState.EXECUTION
         try:
             result = self.handler(self.ctx, **self.params)
@@ -86,7 +135,7 @@ class Command:
 
         
 
-        # TELL
+        # [TELL]
         self.state = CommandState.TELL
         try:
             self._tell(result, None)
@@ -97,16 +146,26 @@ class Command:
 
         
 
-        # AUTOSAVE (do it centrally if command mutates)
-        if self.mutate and self.ctx.config["autosave"]:
+        # [AUTOSAVE] (do it centrally if command mutates)
+        success = isinstance(result, CommandResult) and bool(getattr(result, "outcome", False))
+
+        if success and self.mutate and self.ctx.config["autosave"]:
             from core.data_io import save_node_tree
-            from core.config_loader import save_config
             try:
                 save_node_tree(self.ctx.nodes)
-                save_config(self.ctx.config)
                 self.ctx.log.key("system.autosave_done")
             except Exception as e:
                 self.ctx.log.key("system.autosave_failed", error=e)
 
-        self.state = CommandState.DONE
+        if success and self.mutate_config:
+            from core.config_loader import save_config
+            try:
+                save_config(self.ctx.config)
+                self.ctx.log.key("system.config_save_done")
+            except Exception as e:
+                self.ctx.log.key("system.config_save_failed", error=e)
+
+
+
+        self.state = CommandState.DONE if success else CommandState.FAILED
         return result
