@@ -93,7 +93,7 @@ class GlyphApp(App):
         self.schema = NodeSchema(self.config["custom_schema"] if self.config["custom_schema"] else self.config["default_schema"])
 
         # --- DATA ---
-        self.nodes = load_node_tree()
+        self.nodes = load_node_tree() or []
 
         # --- SERVICES ---
         self.confirm = ConfirmService(self)

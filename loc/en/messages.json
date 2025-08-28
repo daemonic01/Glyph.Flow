@@ -140,7 +140,7 @@
       "level": "ERROR",
       "badge": "ERROR",
       "color": "red",
-      "text": "Failed to load data from '{filename}'. File doesn't exists."
+      "text": "Failed to load data from '{filename}'. Failed to create a new file to receive data."
     },
     "no_data": {
       "level": "WARNING",

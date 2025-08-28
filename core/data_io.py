@@ -35,16 +35,21 @@ def load_node_tree(filename: str = str(DATA_PATH)) -> List[Node]:
     Returns:
         List[Node]: List of root-level Node objects loaded from file.
     """
-    if not os.path.exists(filename):
+    try:
+        if not os.path.exists(filename):
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump([], f)
+            return []
+        
+        with open(filename, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            nodes = [Node.from_dict(entry) for entry in data]
+
+            Node.relabel_missing_ids(nodes)
+
+            return nodes
+    except:
         log.key("file.load_error", filename=filename)
-        return
-    with open(filename, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        nodes = [Node.from_dict(entry) for entry in data]
-
-        Node.relabel_missing_ids(nodes)
-
-        return nodes
 
 
 
