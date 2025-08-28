@@ -132,6 +132,9 @@ Use the input field to enter commands (see below).
 ## 📜 Version History
 
 ### v0.1.0a6 - 2025-08-28
+- Fixed the error on startup without a data file.
+
+### v0.1.0a6 - 2025-08-28
 - Implemented **dual-log system**:
   - `log` for system/runtime messages.
   - `presenter` for visual command outputs.
