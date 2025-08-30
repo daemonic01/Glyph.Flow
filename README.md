@@ -7,7 +7,7 @@ https://github.com/user-attachments/assets/0a706a5a-91e9-4f22-8f0c-a5ba3e3c483a
 **Glyph.Flow** is a minimalist, keyboard-driven TUI workflow manager built with Python and [Textual](https://github.com/Textualize/textual).  
 It allows you to define hierarchical structures such as projects, phases, tasks, and subtasks, and manage them directly from the terminal.
 
-This is an early prototype (v0.1.0a6), mainly focused on backend data modeling and command parsing.
+This is an early prototype (v0.1.0a7), mainly focused on backend data modeling and command parsing.
 
 ---
 
@@ -130,6 +130,9 @@ Use the input field to enter commands (see below).
 ---
 
 ## 📜 Version History
+
+### v0.1.0a7 - 2025-08-28
+- Fixed the error on startup without a data file.
 
 ### v0.1.0a6 - 2025-08-28
 - Implemented **dual-log system**:
