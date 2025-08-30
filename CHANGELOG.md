@@ -1,5 +1,19 @@
 # Changelog – Glyph.Flow
 
+## [v0.1.0a7] – 2025-08-28
+
+### ✨ Added
+
+### 🔧 Improved
+- Fixed the error on startup without a data file.
+
+### 🐛 Known Limitations
+- Undo/redo not yet implemented.
+- Manual command input only – no TUI or keybindings yet
+- Import/export of node trees missing.
+- Panel animations may flicker on some terminals under Windows.
+- Preparing a pixelart logo uses a temporary solution.
+
 ---
 
 ## [v0.1.0a7] – 2025-08-28
