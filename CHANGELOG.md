@@ -16,11 +16,6 @@
 
 ---
 
-## [v0.1.0a7] – 2025-08-28
-- Fixed the error on startup without a data file.
-
----
-
 ## [v0.1.0a6] – 2025-08-28
 
 ### ✨ Added
