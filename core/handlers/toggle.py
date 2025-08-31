@@ -1,5 +1,6 @@
 from typing import Optional, Tuple, Iterable
 from core.controllers.command_result import CommandResult
+from core.controllers.undo_redo import Diff
 
 def toggle_handler(ctx, *, id: Optional[str] = None) -> CommandResult:
     """
@@ -30,13 +31,24 @@ def toggle_handler(ctx, *, id: Optional[str] = None) -> CommandResult:
 
     old_status = bool(getattr(node, "completed", False))
     new_status = not old_status
-    _apply_completed_recursive(node, new_status)
+
+    affected = _gather_subtree(node)
+    forward_ops = []
+    backward_ops = []
+
+    for n in affected:
+        before = bool(getattr(n, "completed", False))
+        setattr(n, "completed", bool(new_status))
+        forward_ops.append({"op": "toggle", "node_id": n.id, "field": "completed", "value": bool(new_status)})
+        backward_ops.append({"op": "toggle", "node_id": n.id, "field": "completed", "value": before})
 
     name = getattr(node, "name", id)
+    diff = Diff(forward=forward_ops, backward=backward_ops)
+
     return CommandResult(
         code="toggled",
         params={"target_name": name, "old_status": old_status, "new_status": new_status},
-        payload={"id": id, "new_status": new_status}, outcome=True
+        payload={"id": id, "new_status": new_status, "diff": diff}, outcome=True
     )
 
 
@@ -94,3 +106,12 @@ def _apply_completed_recursive(node, value: bool) -> None:
     setattr(node, "completed", bool(value))
     for ch in getattr(node, "children", []) or []:
         _apply_completed_recursive(ch, value)
+
+def _gather_subtree(node) -> list:
+    stack = [node]
+    out = []
+    while stack:
+        cur = stack.pop()
+        out.append(cur)
+        stack.extend(getattr(cur, "children", []) or [])
+    return out

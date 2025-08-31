@@ -1,6 +1,8 @@
 from typing import Optional, Tuple
 from core.controllers.command_result import CommandResult
 from core.node import Node
+from core.node import Node
+from core.controllers.undo_redo import Diff, snapshot_node
 
 def delete_handler(ctx, *, id: Optional[str] = None) -> CommandResult:
     """
@@ -30,23 +32,52 @@ def delete_handler(ctx, *, id: Optional[str] = None) -> CommandResult:
         return CommandResult(code="not_found", params={"id": id}, outcome=False)
 
     name = getattr(target, "name", id)
-    
+
     if parent is None:
-        # remove from roots
-        ctx.app.nodes = [r for r in ctx.app.nodes if r is not target]
+        roots = getattr(ctx.app, "nodes", []) or []
+        idx = roots.index(target)
+        snap = snapshot_node(target)
+
+        ctx.app.nodes = [r for r in roots if r is not target]
         Node.relabel_roots(ctx.app.nodes)
+
+        forward = [{"op": "delete", "node_id": id}]
+        backward = [{
+            "op": "create",
+            "snapshot": snap,
+            "parent_id": None,
+            "index": idx
+        }]
+        diff = Diff(forward=forward, backward=backward)
 
         return CommandResult(
             code="deleted_root",
-            params={"target_id": id, "target_name": name}, outcome=True
+            params={"target_id": id, "target_name": name},
+            outcome=True,
+            payload={"diff": diff}
         )
-    
-    # remove from parent's children
-    parent.children = [c for c in getattr(parent, "children", []) if c is not target]
-    Node.relabel_children(target.parent)
+
+    children = getattr(parent, "children", []) or []
+    idx = children.index(target)
+    snap = snapshot_node(target)
+
+    parent.children = [c for c in children if c is not target]
+    Node.relabel_children(parent)
+
+    forward = [{"op": "delete", "node_id": id}]
+    backward = [{
+        "op": "create",
+        "snapshot": snap,
+        "parent_id": parent.id,
+        "index": idx
+    }]
+    diff = Diff(forward=forward, backward=backward)
+
     return CommandResult(
         code="deleted_child",
-        params={"target_id": id, "target_name": name, "target_parent_id": parent.id}, outcome=True
+        params={"target_id": id, "target_name": name, "target_parent_id": parent.id},
+        outcome=True,
+        payload={"diff": diff}
     )
 
 
