@@ -351,7 +351,35 @@ COMMANDS = {
         }
     },
 
+    "undo": {
+    "type": "default",
+    "aliases": [],
+    "description": "Undo last change.",
+    "usage": "undo",
+    "binding": "u",                      # ha szeretnél keybindet
+    "require_data": False,
+    "mutate": True,                      # állapotot változtat
+    "mutate_config": False,
+    "destructive": False,
+    "params": [],
+    "handler": "core.services.undo.undo_handler",
+    "messages": { "success": "system.undo_done" }
+    },
 
+    "redo": {
+        "type": "default",
+        "aliases": [],
+        "description": "Redo last undone change.",
+        "usage": "redo",
+        "binding": "r",
+        "require_data": False,
+        "mutate": True,
+        "mutate_config": False,
+        "destructive": False,
+        "params": [],
+        "handler": "core.services.undo.redo_handler",
+        "messages": { "success": "system.redo_done" }
+    },
 
 
     # később ide jön majd pl. create, delete, edit, schema stb.

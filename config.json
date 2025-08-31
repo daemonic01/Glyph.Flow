@@ -18,14 +18,14 @@
         "Task",
         "Subtask"
     ],
-    "logging": false,
+    "logging": true,
     "log": {
         "rotate": {
             "max_bytes": 262144,
             "backup_count": 5
         }
     },
-    "autosave": false,
+    "autosave": true,
     "assume_yes": false,
     "command_history_maxlen": 50
 }

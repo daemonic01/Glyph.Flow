@@ -36,7 +36,7 @@ def sample_handler(ctx) -> CommandResult:
 
         save_load = Node(name="Write save/load", type="Task")
         impl.add_child(save_load)
-        return CommandResult("success", outcome=True)
+        return CommandResult(code="success", outcome=True)
     
     except SampleTreeError as e:
         ctx.log.error(str(e))

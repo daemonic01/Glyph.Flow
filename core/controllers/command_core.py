@@ -166,6 +166,19 @@ class Command:
                 self.ctx.log.key("system.config_save_failed", error=e)
 
 
+        # record diff if provided by handler
+        if success and self.mutate:
+            diff = None
+            if hasattr(result, "payload") and isinstance(result.payload, dict):
+                diff = result.payload.get("diff")
+
+            if diff is not None:
+                try:
+                    self.ctx.undo_redo.record(diff)
+                    # debug:
+                    self.ctx.log.debug("Recorded diff to undo stack.")
+                except Exception as e:
+                    self.ctx.log.error(f"Undo/Redo record failed: {e}")
 
         self.state = CommandState.DONE if success else CommandState.FAILED
         return result

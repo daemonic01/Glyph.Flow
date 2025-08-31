@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict, Any, Optional
 
 @dataclass
 class CommandResult:
@@ -15,8 +14,9 @@ class CommandResult:
         payload (dict | None): Optional extra data attached to the result.
             Used for returning structured data (e.g. search matches).
     """
-    code: str
-    outcome: False
-    params: Dict[str, Any] = None
-    payload: Optional[Dict] = None
+    def __init__(self, *, code: str, outcome: bool, params: dict | None = None, payload: dict | None = None):
+        self.code = code
+        self.outcome = bool(outcome)
+        self.params = params or {}
+        self.payload = payload or {}
     

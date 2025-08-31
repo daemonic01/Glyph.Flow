@@ -1,4 +1,5 @@
 from core.log import log
+from core.controllers.undo_redo import UndoRedoManager
 
 class Context:
     """
@@ -30,6 +31,14 @@ class Context:
         self.msg = app.message_catalog
         self.schema = app.schema
         self.config = app.config
+        # IMPORTANT: ensure a SINGLE shared manager on the app
+        if not hasattr(self.app, "undo_redo"):
+            self.app.undo_redo = UndoRedoManager()   # one global manager
+
+    @property
+    def undo_redo(self):
+        # always return the app-scoped, persistent manager
+        return self.app.undo_redo
 
 
 

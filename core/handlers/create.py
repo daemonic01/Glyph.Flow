@@ -1,6 +1,7 @@
 from typing import Optional
 from core.controllers.command_result import CommandResult
 from core.node import Node
+from core.controllers.undo_redo import Diff, snapshot_node
 
 
 def create_handler(
@@ -80,9 +81,25 @@ def create_handler(
     # make new root node or attach node to tree
     if parent:
         parent.add_child(new_node)
+        real_index = parent.children.index(new_node)
     else:
         new_node.id = Node.next_free_root_id(ctx.nodes)
         ctx.nodes.append(new_node)
+        real_index = ctx.nodes.index(new_node)
+
+    snapshot = snapshot_node(new_node)
+    forward = [{
+        "op": "create",
+        "snapshot": snapshot,
+        "parent_id": getattr(parent, "id", None),
+        "index": real_index,
+    }]
+    backward = [{
+        "op": "delete",
+        "node_id": new_node.id
+    }]
+    diff = Diff(forward=forward, backward=backward)
+
     return CommandResult(
         code="success",
         params={
@@ -90,7 +107,8 @@ def create_handler(
             "name": name,
             "id": new_node.id,
         },
-        outcome=True
+        outcome=True,
+        payload={"diff": diff}
     )
 
 

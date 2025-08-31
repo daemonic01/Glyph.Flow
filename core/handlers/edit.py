@@ -1,5 +1,7 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List, Dict
 from core.controllers.command_result import CommandResult
+
+from core.controllers.undo_redo import Diff
 
 def edit_handler(
     ctx,
@@ -20,42 +22,63 @@ def edit_handler(
     Behavior:
         - If node not found → returns code="not_found".
         - If one or more fields updated → returns code="edit_done".
+          (payload contains a Diff for undo/redo)
         - If no changes applied → returns code="edit_no_change".
-
-    Args:
-        ctx: Application context (must contain ctx.nodes).
-        id (str | None): ID of the node to edit.
-        name (str | None): New name for the node.
-        short_desc (str | None): New short description.
-        full_desc (str | None): New full description.
-        deadline (str | None): New deadline string.
-
-    Returns:
-        CommandResult: outcome of the edit operation with appropriate code and params.
     """
 
     node, _ = _find_node_and_parent(ctx, id)
     if not node:
         return CommandResult(code="not_found", params={"id": id}, outcome=False)
 
-    changes = []
+    # Collect candidate field updates (param_name -> (attr_name, new_value))
+    candidates: Dict[str, Tuple[str, Optional[str]]] = {
+        "name": ("name", name),
+        "short_desc": ("short_desc", short_desc),
+        "full_desc": ("full_desc", full_desc),
+        "deadline": ("deadline", deadline),
+    }
 
-    if name:
-        node.name = name
-        changes.append(f"name → '{name}'")
-    if short_desc:
-        node.short_desc = short_desc
-        changes.append(f"short_desc → '{short_desc}'")
-    if full_desc:
-        node.full_desc = full_desc
-        changes.append(f"full_desc → '{full_desc}'")
-    if deadline:
-        node.deadline = deadline
-        changes.append(f"deadline → {deadline}")
+    # Compute real changes
+    applied_changes: List[str] = []
+    forward_ops: List[dict] = []
+    backward_ops: List[dict] = []
 
-    if changes:
-        info = ", ".join(changes)
-        return CommandResult(code="edit_done", params={"id": node.id, "info": info}, outcome=True)
+    for param_key, (attr_name, new_value) in candidates.items():
+        if new_value is None:
+            continue
+
+        before_value = getattr(node, attr_name, None)
+        if before_value == new_value:
+            continue  # no real change; skip
+
+        # Apply the change
+        setattr(node, attr_name, new_value)
+        applied_changes.append(f"{attr_name} → '{new_value}'" if new_value is not None else f"{attr_name} → None")
+
+        # Build diff actions (forward = redo, backward = undo)
+        forward_ops.append({
+            "op": "edit",
+            "node_id": node.id,
+            "field": attr_name,
+            "value": new_value,
+        })
+        backward_ops.append({
+            "op": "edit",
+            "node_id": node.id,
+            "field": attr_name,
+            "value": before_value,
+        })
+
+    #
+    if applied_changes:
+        info = ", ".join(applied_changes)
+        diff = Diff(forward=forward_ops, backward=backward_ops)
+        return CommandResult(
+            code="edit_done",
+            params={"id": node.id, "info": info},
+            outcome=True,
+            payload={"diff": diff}
+        )
 
     return CommandResult(code="edit_no_change", params={"id": node.id}, outcome=False)
 
