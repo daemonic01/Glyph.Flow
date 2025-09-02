@@ -350,22 +350,21 @@ COMMANDS = {
             "error":         "cmd.config.error"
         }
     },
-
     "undo": {
-    "type": "default",
-    "aliases": [],
-    "description": "Undo last change.",
-    "usage": "undo",
-    "binding": "u",                      # ha szeretnél keybindet
-    "require_data": False,
-    "mutate": True,                      # állapotot változtat
-    "mutate_config": False,
-    "destructive": False,
-    "params": [],
-    "handler": "core.services.undo.undo_handler",
-    "messages": { "success": "system.undo_done" }
+        "type": "default",
+        "aliases": [],
+        "description": "Undo last change.",
+        "usage": "undo",
+        "binding": "u",
+        "require_data": False,
+        "mutate": True,
+        "mutate_config": False,
+        "destructive": False,
+        "params": [],
+        "handler": "core.services.undo_redo.undo_handler",
+        "messages": {"success": "undo_redo.undo_success",
+                    "no_change": "undo_redo.undo_no_change"}
     },
-
     "redo": {
         "type": "default",
         "aliases": [],
@@ -377,10 +376,31 @@ COMMANDS = {
         "mutate_config": False,
         "destructive": False,
         "params": [],
-        "handler": "core.services.undo.redo_handler",
-        "messages": { "success": "system.redo_done" }
+        "handler": "core.services.undo_redo.redo_handler",
+        "messages": {"success": "undo_redo.redo_success",
+                    "no_change": "undo_redo.redo_no_change"}
+    },
+    "move": {
+        "type": "default",
+        "aliases": [],
+        "description": "Move a child node below another node.",
+        "usage": "move <id> <target_parent_id>",
+        "binding": "r",
+        "require_data": False,
+        "mutate": True,
+        "mutate_config": False,
+        "destructive": False,
+        "params": {
+            "positionals": ["id", "target_parent_id"]
+            },
+        "handler": "core.handlers.move.move_handler",
+        "messages": { "node_not_found": "move.node_not_found",
+                      "move_root_error": "move.move_root_error",
+                      "target_parent_not_found": "move.target_parent_not_found",
+                      "already_there": "move.already_there",
+                      "type_error": "move.type_error",
+                      "move_success": "move.success"}
     },
 
-
-    # később ide jön majd pl. create, delete, edit, schema stb.
+    
 }

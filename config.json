@@ -1,5 +1,5 @@
 {
-    "version": "0.1.0a7",
+    "version": "0.1.0a8",
     "paths": {
         "data": "data/node_data.json",
         "help": "assets/help.txt",
@@ -27,5 +27,6 @@
     },
     "autosave": true,
     "assume_yes": false,
-    "command_history_maxlen": 50
+    "command_history_maxlen": 50,
+    "undo_redo_limit": 50
 }

@@ -7,7 +7,7 @@ https://github.com/user-attachments/assets/0a706a5a-91e9-4f22-8f0c-a5ba3e3c483a
 **Glyph.Flow** is a minimalist, keyboard-driven TUI workflow manager built with Python and [Textual](https://github.com/Textualize/textual).  
 It allows you to define hierarchical structures such as projects, phases, tasks, and subtasks, and manage them directly from the terminal.
 
-This is an early prototype (v0.1.0a7), mainly focused on backend data modeling and command parsing.
+This is an early prototype (v0.1.0a8), mainly focused on backend data modeling and command parsing.
 
 ---
 
@@ -21,7 +21,7 @@ This is an early prototype (v0.1.0a7), mainly focused on backend data modeling a
 - Type-checked schema (e.g. Project > Phase > Task > Subtask)
 - JSON-based save/load of full node trees
 - TUI-based test interface using `Textual`
-- Command-based interaction for early testing: `create`, `edit`, `delete`, `search`, `clearall`, `save`, etc.
+- Command-based interaction for early testing: `create`, `edit`, `delete`, `search`, `clearall`, `save`, `move`, etc.
 - Rich output: tree view, table view, ASCII rendering
 - Interactive confirmation for destructive operations (`delete`, `clearall`)
 - Help text loaded from external file for easier maintenance
@@ -30,6 +30,7 @@ This is an early prototype (v0.1.0a7), mainly focused on backend data modeling a
 - All commands are declaratively defined in a command registry system.
 - Dual-log system: 'log' for system/runtime messages and 'presenter' for visual command outputs.
 - Live updated configuration information in the header.
+- Memory friendly undo/redo feature.
 
 ---
 
@@ -37,7 +38,6 @@ This is an early prototype (v0.1.0a7), mainly focused on backend data modeling a
 - `node.py` – Core Node class with hierarchy and progress logic
 - `schema.py` – Enforces expected child types
 - `data_io.py` – Load/save trees and generate sample data
-- `parser.py` – Command-line argument parsers for various commands
 - `message_styler.py` - Advanved internal message system.
 - `log.py` - Log system that handles internal messages and external logging.
 - `command_history.py` - Retrieveable command history of the last 50 unique commands.
@@ -95,12 +95,16 @@ Use the input field to enter commands (see below).
 - `table`                         – Show nodes in table format
 - `save`                          – Save tree to `node_data.json`
 - `schema`                        – Set a new node hierarchy (e.g. `schema Level1 Level2 Level3 Level4`)
+- `undo`                          - Reverts the last mutative change (create, edit, delete, toggle, move).          * NEW *
+- `redo`                          - Reapplies the last reverted mutative change.                                    * NEW *
 
 #### Node Management
 - `create`                        – Create node (e.g. `create Task "Refactor Logic" --desc "Cleanup" --full "Split backend and UI" --parent 01.01`)
 - `edit`                          – Edit an existing node (e.g. `edit 01.02 --name "New Name" --desc "Short" --full "Detailed" --deadline 2025-08-15`)
 - `delete`                        – Schedule deletion (e.g. `delete 01.01.01`)
 - `confirm delete <id>`           – Confirm a pending delete
+- `toggle <id>`                   – Toggle a node and all its children between done/undone
+- `move <id> <target_id>`         - Move a node below another node (level sensitive). Root can't be moved.          * NEW *
 
 #### Search & Filters
 - `search <substring>`            – Search by name (case-insensitive)
@@ -108,28 +112,83 @@ Use the input field to enter commands (see below).
 - `search id <prefix>`             – Search by exact or prefix ID
 
 #### Bulk Operations
-- `toggle <id>`                   – Toggle a node and all its children between done/undone
 - `clearall`                      – Clear all in-memory nodes (requires confirmation)
 - `save`                          - Save project tree manually.
 
 
 #### Config Operations
-- `config <setting> <on/off>`     - Turn auto-save / confirmation requests / logging on and off.          * NEW *
+- `config <setting> <on/off>`     - Turn auto-save / confirmation requests / logging on and off.
 - `autosave <on/off>`             - Turn auto-save on and off.
 
 ---
 
 ### 💡 Usage examples
-- `sample` → `ls` → `table` / `tree` / `ascii`
-- `create Project "New Project"` → `ls` → `create Phase "Planning"`
-- `sample` → `table` → `delete 01.01` → `confirm delete 01.01` → `table`
-- `sample` → `table` → `toggle 01.01` → `table`
-- `search plan` → list all nodes with “plan” in the name
-- `clearall` → remove all data after confirmation
+
+#### Create display and toggle
+
+```bash
+sample
+ls
+tree
+ascii
+table
+```
+
+```bash
+create Project "TUI APP" --deadline "2030-12-12" --desc "Make a task manager TUI app in Textual." --full "Make a completely useless Textual app for task management."
+table
+toggle 01
+table
+```
+
+#### Delete
+```bash
+create Project "TUI APP" --deadline "2030-12-12" --desc "Make a task manager TUI app in Textual." --full "Make a completely useless Textual app for task management."
+ls
+delete 01
+ls
+```
+
+#### Edit and move:
+```bash
+create Project "TUI APP" --deadline "2030-12-12" --desc "Make a task manager TUI app in Textual." --full "Make a completely useless Textual app for task management."
+create Phase "CORE Implementation" --deadline "2030-10-10" --desc "Implement core functionality of the app." --parent 01
+create Phase "TUI Implementation" --deadline "2030-10-10" --desc "Implement TUI frontend for the app." --parent 01
+create Task "Config Handler" --deadline "2030-09-09" --desc "Make a config handler script for the app." --parent 01.01
+create Task "Commadn Rgistry" --deadline "2030-08-08" --desc "Make a command registry for handling commands." --parent 01.01
+edit 01.01.02 --name "Command Registry"
+create Task "Main Menu" --deadline "2030-08-08" --desc "Make a main menu panel for the app." --parent 01.01
+move 01.01.03 01.02
+
+```
+
+#### Undo & Redo:
+```bash
+create Project "TUI APP" --deadline "2030-12-12" --desc "Make a task manager TUI app in Textual." --full "Make a completely useless Textual app for task management."
+create Phase "CORE Implementation" --deadline "2030-10-10" --desc "Implement core functionality of the app." --parent 01
+create Phase "TUI Implementation" --deadline "2030-10-10" --desc "Implement TUI frontend for the app." --parent 01
+create Task "Config Handler" --deadline "2030-09-09" --desc "Make a config handler script for the app." --parent 01.01
+create Task "Commadn Rgistry" --deadline "2030-08-08" --desc "Make a command registry for handling commands." --parent 01.01
+undo
+create Task "Command Registry" --deadline "2030-08-08" --desc "Make a command registry for handling commands." --parent 01.01
+```
+
+```bash
+create Project "TUI APP" --deadline "2030-12-12" --desc "Make a task manager TUI app in Textual." --full "Make a completely useless Textual app for task management."
+edit 01 --name "Tui App"
+undo
+table
+redo
+table
+```
 
 ---
 
 ## 📜 Version History
+
+### v0.1.0a8 - 2025-09-02:
+- Added `move` command to relocate nodes (level sensitive).
+- Introduced **memory friendly undo/redo feature** for easier project management.
 
 ### v0.1.0a7 - 2025-08-28
 - Fixed the error on startup without a data file.

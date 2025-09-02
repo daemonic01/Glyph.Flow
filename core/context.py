@@ -33,7 +33,7 @@ class Context:
         self.config = app.config
         # IMPORTANT: ensure a SINGLE shared manager on the app
         if not hasattr(self.app, "undo_redo"):
-            self.app.undo_redo = UndoRedoManager()   # one global manager
+            self.app.undo_redo = UndoRedoManager(max_size=self.config["undo_redo_limit"])   # one global manager
 
     @property
     def undo_redo(self):

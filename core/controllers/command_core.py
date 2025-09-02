@@ -175,10 +175,8 @@ class Command:
             if diff is not None:
                 try:
                     self.ctx.undo_redo.record(diff)
-                    # debug:
-                    self.ctx.log.debug("Recorded diff to undo stack.")
                 except Exception as e:
-                    self.ctx.log.error(f"Undo/Redo record failed: {e}")
+                    self.ctx.log.key(f"unexpected_error\n{e}")
 
         self.state = CommandState.DONE if success else CommandState.FAILED
         return result

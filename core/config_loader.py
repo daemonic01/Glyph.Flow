@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 DEFAULT_CONFIG = {
-    "version": "0.1.0a7",
+    "version": "0.1.0a8",
     "paths": {
         "data": "data/node_data.json",
         "help": "assets/help.txt",

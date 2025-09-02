@@ -165,6 +165,73 @@
     }
   },
 
+  "undo_redo": {
+    "undo_success": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Undo successful."
+    },
+    "redo_success": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Redo successful."
+    },
+    "undo_no_change": {
+      "level": "WARNING",
+      "badge": "WARN",
+      "color": "red",
+      "text": "Nothing to undo."
+    },
+    "redo_no_change": {
+      "level": "WARNING",
+      "badge": "WARN",
+      "color": "red",
+      "text": "Nothing to redo."
+    }
+  },
+
+  "move": {
+    "node_not_found": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "The node you want to move not found."
+    },
+    "move_root_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Main node cannot be moved."
+    },
+    "target_parent_not_found": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Target node not found."
+    },
+    "already_there": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "The node you want to move is already in the desired location."
+    },
+    "type_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Incorrect level. A node can only be placed under an object of the next higher level type."
+    },
+    "success": {
+      "level": "SUCCESS",
+      "badge": "SUCCESS",
+      "color": "green",
+      "text": "Move successful."
+    }
+  },
+
+
   "schema": {
     "set_success": {
       "level": "INFO",

@@ -17,6 +17,7 @@ from core.services.schema import NodeSchema
 from asyncio import get_running_loop
 from time import sleep as time_sleep
 from .gf_art import GlyphArt
+import os
 
 
 
@@ -74,7 +75,7 @@ class GlyphApp(App):
                 self.logging_label,
                 id="info-box"
             ),
-            GlyphArt(image_path="assets/images/glyph_flow_logo.png"),
+            GlyphArt(image_path="assets/images/gf_art.png"),
             Container(),
             id="header")
 

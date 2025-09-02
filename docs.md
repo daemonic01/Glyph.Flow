@@ -90,6 +90,18 @@ schema Project Phase Task Subtask
 
 ---
 
+### `move <id> <target_parent_id>`
+
+Move a node below another node (level sensitive). Root can't be moved.
+
+**Example:**
+
+```bash
+move 01.01.01 01.03
+```
+
+---
+
 ### `toggle <id>`
 
 Toggles the selected node and all its children between `done` and `not done`.
@@ -101,6 +113,38 @@ toggle 01.02
 ```
 
 ---
+
+### `undo`
+
+Reverts the last mutative change (create, edit, delete, toggle, move).
+
+**Example:**
+
+```bash
+create Project "name"
+table
+undo
+table
+```
+
+---
+
+### `redo`
+
+Reapplies the last reverted mutative change.
+
+**Example:**
+
+```bash
+create Project "name"
+undo
+table
+redo
+table
+```
+
+---
+
 
 ## 🔍 Search Commands
 

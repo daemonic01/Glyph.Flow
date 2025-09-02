@@ -27,9 +27,20 @@
 [dim]    Example: schema Level1 Level2 Level3   Default: Project Phase Task Subtask
 [white]    Changing the schema with existing data is only possible if the length of the new schema specified is the same as the old one.
 
+[bold white]  move <id> <target_parent_id>
+    Move a node below another node (level sensitive). Root can't be moved.          * NEW *
+[dim]    Example: move 01.01.01 01.03
+
 [bold white]  toggle <id>
     Toggle a node and all its children between done/undone
 [dim]    Example: toggle 01.02
+
+[bold white]  undo
+    Reverts the last mutative change (create, edit, delete, toggle, move).          * NEW *
+
+[bold white]  redo
+    Reapplies the last reverted mutative change.                                    * NEW *
+
 
 [bold]🔍 Search
 [bold white]  search <substring>
@@ -60,7 +71,7 @@
 [bold white]  help         Show this help message
 
 [bold]⚙️ Config
-[bold white]  config <autosave/assume_yes/logging> <on/off>         Turn auto-save / confirmation requests / logging on and off.     * NEW *
+[bold white]  config <autosave/assume_yes/logging> <on/off>         Turn auto-save / confirmation requests / logging on and off.
 
 [bold]🚪 Exit
 [bold white]  q / quit     Exit the application

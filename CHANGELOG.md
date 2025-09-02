@@ -1,5 +1,23 @@
 # Changelog – Glyph.Flow
 
+---
+
+### [v0.1.0a8] - 2025-09-02:
+
+### ✨ Added
+- Added `move` command to relocate nodes (level sensitive).
+- Introduced **memory friendly undo/redo feature** for easier project management (default limit = 50).
+
+### 🔧 Improved
+- Glyph.Flow pixelart for the header now loaded without preparing it at startup.
+- Minor command handler improvements.
+
+### 🐛 Known Limitations
+- Import/export of node trees missing.
+- Panel animations may flicker on some terminals under Windows.
+
+---
+
 ## [v0.1.0a7] – 2025-08-28
 
 ### ✨ Added
