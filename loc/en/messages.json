@@ -300,7 +300,7 @@
       "level": "ERROR",
       "badge": "ERROR",
       "color": "red",
-      "text": "Deadline cannot be earlier than the element at the level above it."
+      "text": "Deadline cannot be later than the element at the level above it."
     },
     "short_desc_too_long": {
       "level": "ERROR",

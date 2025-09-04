@@ -1,5 +1,6 @@
 from typing import Optional, Tuple, List, Dict
 from core.controllers.command_result import CommandResult
+from datetime import datetime
 
 from core.controllers.undo_redo import Diff
 
@@ -26,7 +27,7 @@ def edit_handler(
         - If no changes applied → returns code="edit_no_change".
     """
 
-    node, _ = _find_node_and_parent(ctx, id)
+    node, parent = _find_node_and_parent(ctx, id)
     if not node:
         return CommandResult(code="not_found", params={"id": id}, outcome=False)
 
@@ -43,9 +44,31 @@ def edit_handler(
     forward_ops: List[dict] = []
     backward_ops: List[dict] = []
 
+
     for param_key, (attr_name, new_value) in candidates.items():
         if new_value is None:
             continue
+
+        # datetime validation
+        if attr_name == "deadline" and new_value is not None:
+            if datetime.strptime(new_value, "%Y-%m-%d") <= datetime.today():
+                return CommandResult(code="past_date_error", outcome=False)
+            if parent and datetime.strptime(parent.deadline, "%Y-%m-%d") < datetime.strptime(new_value, "%Y-%m-%d"):
+                return CommandResult(code="deadline_too_early", outcome=False)
+
+        # short and full description length check
+        if attr_name == "short_desc" and len(new_value) > ctx.config["node_properties"]["short_desc_length_limit"]:
+            return CommandResult(code="short_desc_too_long",
+                                params = {"limit": ctx.config["node_properties"]["short_desc_length_limit"],
+                                        "length": len(new_value)},
+                                outcome=False)
+        if attr_name == "full_desc" and len(new_value) > ctx.config["node_properties"]["full_desc_length_limit"]:
+            return CommandResult(code="full_desc_too_long",
+                                params = {"limit": ctx.config["node_properties"]["full_desc_length_limit"],
+                                        "length": len(new_value)},
+                                outcome=False)
+
+
 
         before_value = getattr(node, attr_name, None)
         if before_value == new_value:

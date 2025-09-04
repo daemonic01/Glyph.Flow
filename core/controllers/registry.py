@@ -258,9 +258,13 @@ COMMANDS = {
         },
         "handler": "core.handlers.edit.edit_handler",
         "messages": {
-            "not_found":      "node.node_not_found",
-            "edit_done":      "node.edit_done",
-            "edit_no_change": "node.edit_no_change",
+            "not_found":                "node.node_not_found",
+            "edit_done":                "node.edit_done",
+            "edit_no_change":           "node.edit_no_change",
+            "past_date_error":          "node.past_date_error",
+            "deadline_too_early":       "node.deadline_too_early",
+            "short_desc_too_long":      "node.short_desc_too_long",
+            "full_desc_too_long":       "node.full_desc_too_long"
         }
     },
     "search": {
