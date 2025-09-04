@@ -290,6 +290,30 @@
       "color": "red",
       "text": "Root node must be of type '{expected}', not '{type}'"
     },
+    "past_date_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Deadline cannot be in the past."
+    },
+    "deadline_too_early": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Deadline cannot be earlier than the element at the level above it."
+    },
+    "short_desc_too_long": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "The short description is too long. Maximum length is {limit} character. Current: {length}"
+    },
+    "full_desc_too_long": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "The full description is too long. Maximum length is {limit} character. Current: {length}"
+    },
     "tree_level_error": {
       "level": "ERROR",
       "badge": "ERROR",

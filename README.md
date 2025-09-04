@@ -51,11 +51,10 @@ This is an early prototype (v0.1.0a8), mainly focused on backend data modeling a
 
 ## 🧭 Roadmap Highlights
 - Planned for future versions:
-  - Improved scheme system
   - Advanced `search` filters (by type, regex, etc.)
+  - Import & Export features
+  - Profiles
   - Detailed TUI interface with main menu, project view, settings, and changelog
-  - Undo support
-  - Enhanced error handling
   - TUI Features, Dashboard and statistics
 
 ---

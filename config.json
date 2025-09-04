@@ -6,6 +6,10 @@
         "messages": "loc/en/messages.json",
         "syslog": "logs/app.log"
     },
+    "node_properties": {
+        "short_desc_length_limit": 150,
+        "full_desc_length_limit": 500
+    },
     "default_schema": [
         "Project",
         "Phase",

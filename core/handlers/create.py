@@ -2,6 +2,7 @@ from typing import Optional
 from core.controllers.command_result import CommandResult
 from core.node import Node
 from core.controllers.undo_redo import Diff, snapshot_node
+from datetime import datetime
 
 
 def create_handler(
@@ -68,6 +69,25 @@ def create_handler(
             },
             outcome=False
         )
+
+    # datetime validation
+    if deadline:
+        if datetime.strptime(deadline, "%Y-%m-%d") <= datetime.today():
+            return CommandResult(code="past_date_error", outcome=False)
+        if parent and datetime.strptime(parent.deadline, "%Y-%m-%d") < datetime.strptime(deadline, "%Y-%m-%d"):
+            return CommandResult(code="deadline_too_early", outcome=False)
+
+    # short and full description length check
+    if short_desc and len(short_desc) > ctx.config["node_properties"]["short_desc_length_limit"]:
+        return CommandResult(code="short_desc_too_long",
+                             params = {"limit": ctx.config["node_properties"]["short_desc_length_limit"],
+                                       "length": len(short_desc)},
+                             outcome=False)
+    if full_desc and len(full_desc) > ctx.config["node_properties"]["full_desc_length_limit"]:
+        return CommandResult(code="full_desc_too_long",
+                             params = {"limit": ctx.config["node_properties"]["full_desc_length_limit"],
+                                       "length": len(full_desc)},
+                             outcome=False)
 
     # create node instance
     new_node = Node(

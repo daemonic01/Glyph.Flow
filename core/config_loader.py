@@ -10,6 +10,10 @@ DEFAULT_CONFIG = {
         "messages": "loc/en/messages.json",
         "syslog": "logs/app.log"
     },
+    "node_properties": {
+        "short_desc_length_limit": 100,
+        "full_desc_length_limit": 300
+    },
     "default_schema": [
         "Project",
         "Phase",
@@ -26,7 +30,8 @@ DEFAULT_CONFIG = {
     },
     "autosave": True,
     "assume_yes": False,
-    "command_history_maxlen": 50
+    "command_history_maxlen": 50,
+    "undo_redo_limit": 50
 }
 
 BASE_DIR = Path(__file__).resolve().parent.parent

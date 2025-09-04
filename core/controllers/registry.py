@@ -170,7 +170,11 @@ COMMANDS = {
             "success":                  "node.created_node",
             "parent_not_found_error":   "node.create_parent_not_found",
             "root_type_error":          "node.create_root_node_type_error",
-            "tree_level_error":         "node.tree_level_error"
+            "tree_level_error":         "node.tree_level_error",
+            "past_date_error":          "node.past_date_error",
+            "deadline_too_early":       "node.deadline_too_early",
+            "short_desc_too_long":      "node.short_desc_too_long",
+            "full_desc_too_long":       "node.full_desc_too_long"
         }
     },
 
