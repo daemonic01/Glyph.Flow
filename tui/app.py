@@ -12,17 +12,14 @@ from core.log import _Log
 from core.command_history import CommandHistory
 from core.controllers.command_factory import summon
 from core.services.confirm import ConfirmService
-from core.services.schema import NodeSchema
 from asyncio import get_running_loop
 from time import sleep as time_sleep
 from .gf_art import GlyphArt
-from core.context import Context
 from core.config.config_vault import ConfigVault
-
-
+from core.glyph_nexus import GlyphNexus
 
 class GlyphRichLog(RichLog):
-    def __init__(self, *args, buffer_cap=1000, **kwargs):
+    def __init__(self, *args, buffer_cap=100, **kwargs):
         super().__init__(*args, **kwargs)
         self._buffer: list[tuple[tuple, dict]] = []
         self._buffer_cap = buffer_cap
@@ -91,18 +88,22 @@ class GlyphApp(App):
 
     def on_mount(self):
         # --- CONFIG ---
+        self.ctx = GlyphNexus()
 
         # --- SERVICES ---
-        messages_path = self.config.get("paths.messages", "loc/en/messages.json", str)
+        messages_path = self.ctx.config.get("paths.messages", "loc/en/messages.json", str)
         self.message_catalog = MessageCatalog.from_file(messages_path)
+        self.confirm = ConfirmService(ctx=self.ctx)
+        self.ctx.bind_app_core(app=self.app)
+
+        # --- UI ---
         self.message_log = _Log(config=self.config)
         self.message_log.configure(writer=self.log_widget.write, catalog=self.message_catalog, debug=self.config.get("debug", False))
         self.message_log.configure_from_config(self.config)
         self.presenter = _Log(config=self.config)
         self.presenter.configure(writer=self.output_widget.write, catalog=self.message_catalog, debug=self.config.get("debug", False))
         self.terminal_history = CommandHistory(self.config.get("command_history_maxlen"))
-        self.ctx = Context(self.app)
-        self.confirm = ConfirmService(ctx=self.ctx)
+        self.ctx.bind_ui()
 
         # --- DATA ---
         self.nodes = load_node_tree(self.ctx) or []
@@ -132,7 +133,7 @@ class GlyphApp(App):
                 return
         
         try:
-            ccmd = summon(cmd, ctx=self.get_ctx())
+            ccmd = summon(cmd, ctx=self.ctx)
         except Exception as e:
             self.ctx.log.error(str(e))
             return
