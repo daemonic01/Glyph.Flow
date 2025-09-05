@@ -11,5 +11,5 @@ def help_handler(ctx):
         ctx: Application context (must provide ctx.app.output_widget).
     """
     from core.data_io import load_help_text
-    for line in load_help_text():
+    for line in load_help_text(ctx):
         ctx.app.output_widget.write(line)

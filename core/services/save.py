@@ -9,7 +9,7 @@ def save_handler(ctx) -> CommandResult:
     Persists the current in-memory node tree to the configured data file.
 
     Args:
-        ctx: Application context (must provide ctx.app.nodes).
+        ctx: Application context (must provide ctx).
 
     Returns:
         CommandResult:
@@ -17,7 +17,7 @@ def save_handler(ctx) -> CommandResult:
             - code="manual_save_failed" with outcome=False if an error occurs.
     """
     try:
-        save_node_tree(ctx.app.nodes)
+        save_node_tree(ctx)
         return CommandResult(
             code="manual_save_completed",
             outcome=True

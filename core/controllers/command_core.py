@@ -82,7 +82,7 @@ class Command:
 
         msgs = (self.spec.get("messages") or {})
         if error:
-            self.ctx.log.debug(error)
+            self.ctx.log.error(error)
             code = getattr(error, "code", None)
             params = getattr(error, "params", {}) or {"error": str(error)}
             key = (msgs.get(code) if code else None) or msgs.get("error") or "system.unexpected_error"
@@ -118,7 +118,7 @@ class Command:
             CommandResult or None
         """
 
-        if self.destructive and not self.ctx.config["assume_yes"] and not self._confirmed:
+        if self.destructive and not self.ctx.config.get("assume_yes", False, bool) and not self._confirmed:
             self.ctx.confirm.request(self, prompt=f"Execute '{self.name}'? This cannot be undone. (y/n)")
             self.paused = True
             return
@@ -149,18 +149,17 @@ class Command:
         # [AUTOSAVE] (do it centrally if command mutates)
         success = isinstance(result, CommandResult) and bool(getattr(result, "outcome", False))
 
-        if success and self.mutate and self.ctx.config["autosave"]:
+        if success and self.mutate and self.ctx.config.get("autosave", True, bool):
             from core.data_io import save_node_tree
             try:
-                save_node_tree(self.ctx.nodes)
+                save_node_tree(self.ctx)
                 self.ctx.log.key("system.autosave_done")
             except Exception as e:
                 self.ctx.log.key("system.autosave_failed", error=e)
 
         if success and self.mutate_config:
-            from core.config_loader import save_config
             try:
-                save_config(self.ctx.config)
+                self.ctx.config.save()
                 self.ctx.log.key("system.config_save_done")
             except Exception as e:
                 self.ctx.log.key("system.config_save_failed", error=e)

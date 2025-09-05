@@ -7,9 +7,8 @@ from textual import events
 from core.data_io import load_node_tree
 from core.node import Node
 from typing import Optional
-from core.config_loader import load_config
 from core.message_styler import MessageCatalog
-from core.log import log, _Log
+from core.log import _Log
 from core.command_history import CommandHistory
 from core.controllers.command_factory import summon
 from core.services.confirm import ConfirmService
@@ -17,7 +16,8 @@ from core.services.schema import NodeSchema
 from asyncio import get_running_loop
 from time import sleep as time_sleep
 from .gf_art import GlyphArt
-import os
+from core.context import Context
+from core.config.config_vault import ConfigVault
 
 
 
@@ -50,7 +50,7 @@ class GlyphRichLog(RichLog):
 
 
 class GlyphApp(App):
-    config = load_config()
+    config = ConfigVault()
     CSS_PATH = "app.tcss"
     BINDINGS = [
         ("q", "quit", "Quit"),
@@ -87,45 +87,47 @@ class GlyphApp(App):
         yield Vertical(self.header,
                        Rule(line_style="double"),
                        Horizontal(self.log_widget, self.output_widget),
-                       self.input)
+                       self.input, id="TUI")
 
     def on_mount(self):
         # --- CONFIG ---
-        self.schema = NodeSchema(self.config["custom_schema"] if self.config["custom_schema"] else self.config["default_schema"])
-
-        # --- DATA ---
-        self.nodes = load_node_tree() or []
+        self.schema = NodeSchema(self.config.get("custom_schema") if self.config.get("custom_schema") else self.config.get("default_schema"))
 
         # --- SERVICES ---
-        self.confirm = ConfirmService(self)
-        messages_path = self.config["paths"].get("messages", "loc/en/messages.json")
+        messages_path = self.config.get("paths.messages", "loc/en/messages.json", str)
         self.message_catalog = MessageCatalog.from_file(messages_path)
-        log.configure(writer=self.log_widget.write, catalog=self.message_catalog, debug=self.config.get("debug", False))
-        log.configure_from_config(self.config)
-        self.presenter = _Log()
+        self.message_log = _Log(config=self.config)
+        self.message_log.configure(writer=self.log_widget.write, catalog=self.message_catalog, debug=self.config.get("debug", False))
+        self.message_log.configure_from_config(self.config)
+        self.presenter = _Log(config=self.config)
         self.presenter.configure(writer=self.output_widget.write, catalog=self.message_catalog, debug=self.config.get("debug", False))
-        self.terminal_history = CommandHistory(self.config["command_history_maxlen"])
+        self.terminal_history = CommandHistory(self.config.get("command_history_maxlen"))
+        self.ctx = Context(self.app)
+        self.confirm = ConfirmService(ctx=self.ctx)
+
+        # --- DATA ---
+        self.nodes = load_node_tree(self.ctx) or []
 
         # --- STARTUP ---
         self.refresh_header_from_config()
         self.call_after_refresh(
         lambda: (
-            log.key("system.startup_hint")
+            self.ctx.log.key("system.startup_hint")
             )
         )
-        #541A1A
+
         
         self.input.focus()
 
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle command input from the user and execute corresponding actions."""
-        self.schema = NodeSchema(self.config["custom_schema"] if self.config["custom_schema"] else self.config["default_schema"])
+        self.schema = NodeSchema(self.ctx.config.get("custom_schema") if self.ctx.config.get("custom_schema") else self.ctx.config.get("default_schema"))
 
         self.mutated = False
         cmd = event.value.strip()
         self.input.value = ""
-        log.key("system.cmd_input", cmd=cmd)
+        self.ctx.log.key("system.cmd_input", cmd=cmd)
         self.terminal_history.add(cmd)
 
         if self.confirm.has_pending():
@@ -135,13 +137,14 @@ class GlyphApp(App):
         try:
             ccmd = summon(cmd, ctx=self.get_ctx())
         except Exception as e:
-            log.error(str(e))
+            self.ctx.log.error(str(e))
             return
         
         if ccmd is None:
             return
         else:
             ccmd.execute()
+            self.ctx.config.reload()
             self.refresh_header_from_config()
 
 
@@ -168,7 +171,6 @@ class GlyphApp(App):
 
     def get_ctx(self):
         """Create a Context object with the configuration data already loaded and passing in the necessary widgets."""
-        from core.context import Context
         return Context(
             app=self,
         )
@@ -206,6 +208,6 @@ class GlyphApp(App):
             self.output_focus = False
 
     def refresh_header_from_config(self) -> None:
-        self.version_label.update(f"Active version: {self.config.get('version', 'unknown')}")
-        self.autosave_label.update(f"Autosave: {'ON' if self.config.get('autosave') else 'OFF'}")
-        self.logging_label.update(f"Logging: {'ON' if self.config.get('logging') else 'OFF'}")
+        self.version_label.update(f"Active version: {self.ctx.config.get('version', 'unknown')}")
+        self.autosave_label.update(f"Autosave: {'ON' if self.ctx.config.get('autosave') else 'OFF'}")
+        self.logging_label.update(f"Logging: {'ON' if self.ctx.config.get('logging') else 'OFF'}")

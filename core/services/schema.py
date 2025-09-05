@@ -83,10 +83,10 @@ def _get_default_levels(ctx) -> List[str]:
     """
     Return a default schema.
 
-    Tries to read from ctx.config["default_schema"], falling back to DEFAULT_FALLBACK.
+    Tries to read from ctx.config("default_schema"), falling back to DEFAULT_FALLBACK.
     """
-    if hasattr(ctx.config, "default_schema"):
-        return list(ctx.config["default_schema"])
+    if ctx.config.get("default_schema"):
+        return list(ctx.config.get("default_schema"))
     return list(DEFAULT_FALLBACK)
 
 
@@ -130,7 +130,7 @@ def schema_handler(ctx, *, hierarchy: Optional[List[str]] = None, use_default: b
         # --- case: first time schema set ---
         if current_schema is None:
             ctx.schema = NodeSchema(levels)
-            ctx.config["custom_schema"] = levels
+            ctx.config.edit("custom_schema", levels)
             return CommandResult(
                 code="set_success",
                 params={"schema": new_schema_str},
@@ -156,14 +156,14 @@ def schema_handler(ctx, *, hierarchy: Optional[List[str]] = None, use_default: b
                 outcome=False
             )
 
-        # --- apply schema + relabel nodes if present ---
+        # apply schema + relabel nodes if present
         target_schema = NodeSchema(levels)
         if has_nodes:
             for root in ctx.nodes:
                 target_schema.relabel_tree_to_match(root)
 
         ctx.schema = target_schema
-        ctx.config["custom_schema"] = levels
+        ctx.config.edit("custom_schema", levels)
 
         if use_default:
             return CommandResult(

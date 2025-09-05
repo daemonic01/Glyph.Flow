@@ -57,14 +57,14 @@ def edit_handler(
                 return CommandResult(code="deadline_too_early", outcome=False)
 
         # short and full description length check
-        if attr_name == "short_desc" and len(new_value) > ctx.config["node_properties"]["short_desc_length_limit"]:
+        if attr_name == "short_desc" and len(new_value) > ctx.config.get("node_properties.short_desc_length_limit", 100, int):
             return CommandResult(code="short_desc_too_long",
-                                params = {"limit": ctx.config["node_properties"]["short_desc_length_limit"],
+                                params = {"limit": ctx.config.get("node_properties.short_desc_length_limit", 100, int),
                                         "length": len(new_value)},
                                 outcome=False)
-        if attr_name == "full_desc" and len(new_value) > ctx.config["node_properties"]["full_desc_length_limit"]:
+        if attr_name == "full_desc" and len(new_value) > ctx.config.get("node_properties.full_desc_length_limit", 100, int):
             return CommandResult(code="full_desc_too_long",
-                                params = {"limit": ctx.config["node_properties"]["full_desc_length_limit"],
+                                params = {"limit": ctx.config.get("node_properties.full_desc_length_limit", 100, int),
                                         "length": len(new_value)},
                                 outcome=False)
 

@@ -1,3 +1,16 @@
+Screen {
+    align: center middle;
+    background: #130303ff;
+}
+
+#TUI {
+    width: 97%;
+    height: 97%;
+    align: center middle;
+    content-align: center middle;
+    background: transparent;
+}
+
 RichLog {
     width: 100%;
     height: auto;
@@ -70,10 +83,11 @@ Vertical {
 InfoLabel {
     background: #851b1bff;
     color: #1f1f1fff;
+    text-style: bold;
 }
 
 Rule {
-    background: #1f1f1fff;
+    background: #130303ff;
     color: #851b1bff;
     margin: 0;
     padding: 0;

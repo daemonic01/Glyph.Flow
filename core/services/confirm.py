@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Optional
-from core.log import log
 
 @dataclass
 class Pending:
@@ -25,12 +24,12 @@ class ConfirmService:
            Otherwise → command is cancelled.
     """
 
-    def __init__(self, app):
+    def __init__(self, ctx):
         """
         Args:
             app: Reference to the GlyphApp (used for accessing nodes, log, etc.).
         """
-        self.app = app
+        self.ctx = ctx
         self.pending: Optional[Pending] = None
 
 
@@ -44,7 +43,7 @@ class ConfirmService:
             prompt (str): Message to display in the log.
         """
         self.pending = Pending(cmd=cmd, prompt=prompt)
-        log.info(prompt)
+        self.ctx.log.info(prompt)
 
 
 
@@ -82,6 +81,6 @@ class ConfirmService:
 
             cmd.execute()
         else:
-            log.info("Cancelled.")
+            self.ctx.log.info("Cancelled.")
             self.pending = None
         return True

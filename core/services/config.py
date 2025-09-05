@@ -1,6 +1,5 @@
 from typing import Optional
 from core.controllers.command_result import CommandResult
-from core.config_loader import save_config
 
 
 SUPPORTED_KEYS = {
@@ -66,23 +65,18 @@ def config_handler(ctx, *, setting: Optional[str] = None, value: Optional[str] =
     if b is None:
         return CommandResult(code="invalid_value", params={"k": key_in}, outcome=False)
 
-    # Ensure config dict exists
-    cfg = getattr(ctx.app, "config", None)
-    if cfg is None:
 
-        cfg = {}
-        setattr(ctx.app, "config", cfg)
 
-    current = cfg.get(cfg_key)
+    current = ctx.config.get(cfg_key)
 
 
     if current is not None and bool(current) == b:
         return CommandResult(code="no_change", params={"setting": cfg_key, "value": "ON" if b else "OFF"}, outcome=False)
 
     # Update and persist
-    cfg[cfg_key] = b
+    ctx.config.edit(cfg_key, b)
     try:
-        save_config(cfg)
+        ctx.config.save()
     except Exception as e:
 
         return CommandResult(code="error", params={"error": str(e)}, outcome=False)

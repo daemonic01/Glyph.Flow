@@ -1,5 +1,6 @@
-from core.log import log
+from pathlib import Path
 from core.controllers.undo_redo import UndoRedoManager
+from core.config.config_vault import ConfigVault
 
 class Context:
     """
@@ -18,26 +19,26 @@ class Context:
         config: Application configuration dict.
     """
 
-    def __init__(self, *, app):
+    def __init__(self, app):
         """
         Initialize a new Context.
 
         Args:
             app: The main application instance (Textual App).
         """
+        self.base_dir = Path(__file__).resolve().parent.parent
         self.app = app
-        self.log = log
+        self.log = app.message_log
         self.presenter = app.presenter
         self.msg = app.message_catalog
         self.schema = app.schema
-        self.config = app.config
-        # IMPORTANT: ensure a SINGLE shared manager on the app
+        self.config = ConfigVault(path=self.base_dir / "config.json")
+
         if not hasattr(self.app, "undo_redo"):
-            self.app.undo_redo = UndoRedoManager(max_size=self.config["undo_redo_limit"])   # one global manager
+            self.app.undo_redo = UndoRedoManager(max_size=self.config["undo_redo_limit"])
 
     @property
     def undo_redo(self):
-        # always return the app-scoped, persistent manager
         return self.app.undo_redo
 
 

@@ -3,30 +3,30 @@ import json
 import os
 from typing import List
 from .node import Node
-from core.config_loader import load_config
-from core.log import log
+
 
 
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-config = load_config()
-DATA_PATH = BASE_DIR / config["paths"]["data"]
 
 
-def save_node_tree(root_nodes: List[Node], filename: str = str(DATA_PATH)):
+
+def save_node_tree(ctx):
     """Save the given list of root nodes to a JSON file.
 
     Args:
         root_nodes (List[Node]): List of root-level Node objects to save.
         filename (str): Path to the JSON file where data will be written.
     """
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump([node.to_dict() for node in root_nodes], f, indent=2, ensure_ascii=False)
+    DATA_PATH = BASE_DIR / ctx.config.get("paths.data")
+
+    with open(DATA_PATH, "w", encoding="utf-8") as f:
+        json.dump([node.to_dict() for node in ctx.app.nodes], f, indent=2, ensure_ascii=False)
     
 
 
-def load_node_tree(filename: str = str(DATA_PATH)) -> List[Node]:
+def load_node_tree(ctx) -> List[Node]:
     """Load a node tree from a JSON file.
 
     Args:
@@ -35,13 +35,15 @@ def load_node_tree(filename: str = str(DATA_PATH)) -> List[Node]:
     Returns:
         List[Node]: List of root-level Node objects loaded from file.
     """
+    DATA_PATH = BASE_DIR / ctx.config.get("paths.data")
+
     try:
-        if not os.path.exists(filename):
-            with open(filename, "w", encoding="utf-8") as f:
+        if not os.path.exists(DATA_PATH):
+            with open(DATA_PATH, "w", encoding="utf-8") as f:
                 json.dump([], f)
             return []
         
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(DATA_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
             nodes = [Node.from_dict(entry) for entry in data]
 
@@ -49,12 +51,15 @@ def load_node_tree(filename: str = str(DATA_PATH)) -> List[Node]:
 
             return nodes
     except:
-        log.key("file.load_error", filename=filename)
+        ctx.log.key("file.load_error", filename=DATA_PATH)
 
 
 
-def delete_data_file(filename: str = str(DATA_PATH)) -> bool:
+def delete_data_file(ctx, filename: str) -> bool:
     """Delete the node data file if it exists. Returns True if deleted."""
+    
+    DATA_PATH = BASE_DIR / ctx.config.get("paths.data")
+
     if os.path.exists(filename):
         os.remove(filename)
         return True
@@ -62,9 +67,12 @@ def delete_data_file(filename: str = str(DATA_PATH)) -> bool:
 
 
 
-HELP_PATH = BASE_DIR / config["paths"]["help"]
 
-def load_help_text() -> list[str]:
+
+def load_help_text(ctx) -> list[str]:
     """Load data.txt for help command."""
+
+    HELP_PATH = BASE_DIR / ctx.config.get("paths.help")
+
     with open(HELP_PATH, "r", encoding="utf-8") as f:
         return [line.rstrip("\n") for line in f]

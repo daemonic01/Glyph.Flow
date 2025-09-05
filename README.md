@@ -41,7 +41,6 @@ This is an early prototype (v0.1.0a8), mainly focused on backend data modeling a
 - `message_styler.py` - Advanved internal message system.
 - `log.py` - Log system that handles internal messages and external logging.
 - `command_history.py` - Retrieveable command history of the last 50 unique commands.
-- `config_loader.py` - Utility functions that handle external config.
 - `context.py` - Real time global available data for operations.
 - `/controllers` - Command registry system.
 - `/handlers, /presenters, /services` - Clear handler function system for the command registry.
@@ -101,7 +100,6 @@ Use the input field to enter commands (see below).
 - `create`                        – Create node (e.g. `create Task "Refactor Logic" --desc "Cleanup" --full "Split backend and UI" --parent 01.01`)
 - `edit`                          – Edit an existing node (e.g. `edit 01.02 --name "New Name" --desc "Short" --full "Detailed" --deadline 2025-08-15`)
 - `delete`                        – Schedule deletion (e.g. `delete 01.01.01`)
-- `confirm delete <id>`           – Confirm a pending delete
 - `toggle <id>`                   – Toggle a node and all its children between done/undone
 - `move <id> <target_id>`         - Move a node below another node (level sensitive). Root can't be moved.          * NEW *
 
@@ -113,7 +111,6 @@ Use the input field to enter commands (see below).
 #### Bulk Operations
 - `clearall`                      – Clear all in-memory nodes (requires confirmation)
 - `save`                          - Save project tree manually.
-
 
 #### Config Operations
 - `config <setting> <on/off>`     - Turn auto-save / confirmation requests / logging on and off.

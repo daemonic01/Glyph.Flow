@@ -4,13 +4,10 @@ from dataclasses import dataclass
 from typing import Callable, Deque, Optional, Any, Tuple, TextIO
 import os
 
-from .config_loader import load_config
 from .message_styler import (
     MessageCatalog, FormatterFuncs, ResolvedMessage,
     format_info, format_warning, format_error, format_success, format_debug, format_help
 )
-
-cfg = load_config()
 
 # A sink is any callable that can accept a rendered (Rich-markup) string,
 # plus optional metadata (level, raw_text, badge) when we fan out programmatically.
@@ -48,7 +45,8 @@ class _Log:
         log.configure(writer=rich_log.write, catalog=MessageCatalog.from_file(...))
         log.configure_from_config(app_config)  # enables file logging if configured
     """
-    def __init__(self) -> None:
+    def __init__(self, config) -> None:
+        self.config = config
         # Messages.json catalog (for key-based logging). Optional at start.
         self._catalog: Optional[MessageCatalog] = None
 
@@ -410,7 +408,3 @@ class _Log:
             else:
                 # Already rendered: write directly
                 self._fanout_writer(payload.text)
-
-
-# Module-level singleton used across the app
-log = _Log()

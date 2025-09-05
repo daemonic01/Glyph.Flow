@@ -78,14 +78,14 @@ def create_handler(
             return CommandResult(code="deadline_too_early", outcome=False)
 
     # short and full description length check
-    if short_desc and len(short_desc) > ctx.config["node_properties"]["short_desc_length_limit"]:
+    if short_desc and len(short_desc) > ctx.config.get("node_properties.short_desc_length_limit", 100, int):
         return CommandResult(code="short_desc_too_long",
-                             params = {"limit": ctx.config["node_properties"]["short_desc_length_limit"],
+                             params = {"limit": ctx.config.get("node_properties.short_desc_length_limit", 100, int),
                                        "length": len(short_desc)},
                              outcome=False)
-    if full_desc and len(full_desc) > ctx.config["node_properties"]["full_desc_length_limit"]:
+    if full_desc and len(full_desc) > ctx.config.get("node_properties.full_desc_length_limit", 300, int):
         return CommandResult(code="full_desc_too_long",
-                             params = {"limit": ctx.config["node_properties"]["full_desc_length_limit"],
+                             params = {"limit": ctx.config.get("node_properties.full_desc_length_limit", 300, int),
                                        "length": len(full_desc)},
                              outcome=False)
 
