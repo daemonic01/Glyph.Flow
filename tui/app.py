@@ -91,7 +91,6 @@ class GlyphApp(App):
 
     def on_mount(self):
         # --- CONFIG ---
-        self.schema = NodeSchema(self.config.get("custom_schema") if self.config.get("custom_schema") else self.config.get("default_schema"))
 
         # --- SERVICES ---
         messages_path = self.config.get("paths.messages", "loc/en/messages.json", str)
@@ -122,8 +121,6 @@ class GlyphApp(App):
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle command input from the user and execute corresponding actions."""
-        self.schema = NodeSchema(self.ctx.config.get("custom_schema") if self.ctx.config.get("custom_schema") else self.ctx.config.get("default_schema"))
-
         self.mutated = False
         cmd = event.value.strip()
         self.input.value = ""

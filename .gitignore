@@ -82,6 +82,6 @@ log/
 
 # ---- Project-specific ----
 # Keep the data folder, ignore its contents
-data/*
 !data/.gitkeep
+data/*
 temp/*

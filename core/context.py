@@ -1,6 +1,7 @@
 from pathlib import Path
 from core.controllers.undo_redo import UndoRedoManager
 from core.config.config_vault import ConfigVault
+from core.services.schema import NodeSchema
 
 class Context:
     """
@@ -31,8 +32,8 @@ class Context:
         self.log = app.message_log
         self.presenter = app.presenter
         self.msg = app.message_catalog
-        self.schema = app.schema
         self.config = ConfigVault(path=self.base_dir / "config.json")
+        self.schema = NodeSchema(self.config.get("custom_schema") or self.config.get("default_schema"))
 
         if not hasattr(self.app, "undo_redo"):
             self.app.undo_redo = UndoRedoManager(max_size=self.config["undo_redo_limit"])
@@ -65,5 +66,4 @@ class Context:
             new_nodes (list[Node]): New list of root nodes.
         """
         self.app.nodes = new_nodes
-
-    
+        
