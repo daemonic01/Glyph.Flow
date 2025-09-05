@@ -167,13 +167,6 @@ class GlyphApp(App):
                 event.stop()
 
 
-    def get_ctx(self):
-        """Create a Context object with the configuration data already loaded and passing in the necessary widgets."""
-        return Context(
-            app=self,
-        )
-
-
 
     async def action_adjust(self) -> None:
         """Adjust the width of the left (log_widget) and right (output_widget) log panels."""

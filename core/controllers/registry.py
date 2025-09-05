@@ -393,7 +393,7 @@ COMMANDS = {
         "aliases": [],
         "description": "Move a child node below another node.",
         "usage": "move <id> <target_parent_id>",
-        "binding": "r",
+        "binding": None,
         "require_data": False,
         "mutate": True,
         "mutate_config": False,
@@ -408,6 +408,46 @@ COMMANDS = {
                       "already_there": "move.already_there",
                       "type_error": "move.type_error",
                       "move_success": "move.success"}
+    },
+
+    "export": {
+        "type": "default",
+        "aliases": ["ex"],
+        "description": "Export nodes to CSV, PDF or JSON.",
+        "usage": "export [--format csv|pdf|json] [--path <file>] [--scope all|current|subtree:<id>|filter:<query>] "
+                 "[--columns col1,col2,...] [--sort <col:asc|desc>] [--no-completed]",
+        "binding": None,
+        "require_data": True,
+        "mutate": False,
+        "mutate_config": False,
+        "destructive": False,
+        "params": {
+            "positionals": [],
+            "options": {
+                "--format": "format",
+                "--path": "path",
+                "--scope": "scope",
+                "--columns": "columns",
+                "--sort": "sort",
+                "--no-completed": { "to": "include_completed", "flag": True }
+            },
+            "defaults": {
+                "format": "csv",
+                "path": None,
+                "scope": "all",
+                "columns": None,
+                "sort": "",
+                "include_completed": True
+            }
+        },
+        "handler": "core.services.export.export_handler",
+        "before": None,
+        "after": None,
+        "messages": {
+            "success": "export.success",
+            "invalid_format": "export.invalid_format",
+            "export_failed": "export.failed"
+        }
     },
 
     

@@ -85,3 +85,4 @@ log/
 !data/.gitkeep
 data/*
 temp/*
+export/

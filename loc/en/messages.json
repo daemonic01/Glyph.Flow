@@ -430,18 +430,24 @@
     }
   },
 
-  "help": {
-    "usage_create": {
-      "level": "HINT",
-      "badge": "HELP",
-      "color": "cyan",
-      "text": "Usage: create <type> <name> [--desc ...] [--full ...] [--deadline YYYY-MM-DD] [--parent <id>]"
+  "export": {
+    "success": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Export successful to {path}. {rows} rows written."
     },
-    "usage_delete": {
-      "level": "HINT",
-      "badge": "HELP",
-      "color": "cyan",
-      "text": "Usage: delete <id>"
+    "invalid_format": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Invalid format: '{format}'. Please use 'csv', 'pdf' or 'json'."
+    },
+    "export_failed": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Export {format} {path} failed. Error: {error}"
     }
   },
 

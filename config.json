@@ -4,7 +4,8 @@
         "data": "data/node_data.json",
         "help": "assets/help.txt",
         "messages": "loc/en/messages.json",
-        "syslog": "logs/app.log"
+        "syslog": "logs/app.log",
+        "export": "export/"
     },
     "node_properties": {
         "short_desc_length_limit": 100,
