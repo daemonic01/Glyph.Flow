@@ -37,6 +37,8 @@ def load_node_tree(filename: str = str(DATA_PATH)) -> List[Node]:
     """
     try:
         if not os.path.exists(filename):
+            if not os.path.exists(DATA_PATH.parent):
+                os.mkdir("data")
             with open(filename, "w", encoding="utf-8") as f:
                 json.dump([], f)
             return []
