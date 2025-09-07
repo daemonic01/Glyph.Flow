@@ -38,17 +38,10 @@ def load_node_tree(ctx) -> List[Node]:
     DATA_PATH = BASE_DIR / ctx.config.get("paths.data")
 
     try:
-<<<<<<< HEAD
         if not os.path.exists(DATA_PATH):
             if not os.path.exists(DATA_PATH.parent):
                 os.mkdir("data")
             with open(DATA_PATH, "w", encoding="utf-8") as f:
-=======
-        if not os.path.exists(filename):
-            if not os.path.exists(DATA_PATH.parent):
-                os.mkdir("data")
-            with open(filename, "w", encoding="utf-8") as f:
->>>>>>> 19387c730a25e5b6ba3e51f236e56905d5a8d2d8
                 json.dump([], f)
             return []
         
