@@ -1,5 +1,3 @@
-https://github.com/user-attachments/assets/0a706a5a-91e9-4f22-8f0c-a5ba3e3c483a  
-
 # ✨ Glyph.Flow
 
 > **Minimalist, keyboard-driven workflow manager in your terminal.**  
