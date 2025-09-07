@@ -14,7 +14,7 @@ def ls_handler(ctx):
         ctx: Application context (must provide ctx.app.nodes, ctx.presenter, ctx.log).
     """
     if ctx.app.nodes:
-        ctx.app.output_widget.write("[]bold white]\nRoot nodes:")
+        ctx.app.output_widget.write("[bold white]\nRoot nodes:")
         for n in ctx.app.nodes:
             ctx.app.output_widget.write(f"[#FDC483]- {n.name} ({n.type}, ID = {n.id})")
     else:
