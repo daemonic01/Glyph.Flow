@@ -74,7 +74,7 @@ def create_handler(
     if deadline:
         if datetime.strptime(deadline, "%Y-%m-%d") <= datetime.today():
             return CommandResult(code="past_date_error", outcome=False)
-        if parent and datetime.strptime(parent.deadline, "%Y-%m-%d") < datetime.strptime(deadline, "%Y-%m-%d"):
+        if parent and parent.deadline and datetime.strptime(parent.deadline, "%Y-%m-%d") < datetime.strptime(deadline, "%Y-%m-%d"):
             return CommandResult(code="deadline_too_early", outcome=False)
 
     # short and full description length check

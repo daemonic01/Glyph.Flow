@@ -34,7 +34,7 @@ def _resolve_import(path: str):
     try:
         mod = importlib.import_module(mod_path)
     except Exception as e:
-        raise ParseError(f"Cannot import module '{mod_path}'") from e
+        raise ParseError(f"Cannot import module '{mod_path}'. {e}") from e
     try:
         obj = getattr(mod, attr)
     except AttributeError as e:

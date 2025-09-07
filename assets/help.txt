@@ -12,34 +12,42 @@
 [bold]🛠  Structure
 [bold white]  create <type> <name> [--desc] [--full] [--deadline] [--parent <id>]
     Create a new node (Project, Phase, Task, Subtask)
+[dim]    Aliases: "c"
 [dim]    Example: create Task "Fix Logic" --desc "Bugfix" --parent 01.02
 
 [bold white]  edit <id> [--name] [--desc] [--full] [--deadline]
     Edit an existing node's name, descriptions, or deadline
+[dim]    Aliases: "e"
 [dim]    Example: edit 01.02 --name "New Name" --desc "Short" --full "Detailed" --deadline 2025-08-15
 
 [bold white]  delete <id>
     Schedule deletion of a node (requires confirm)
+[dim]    Aliases: "del", "remove", "rm"
 [dim]    Example: delete 01.01
 
 [bold white]  schema <type1> <type2> ...
     Change hierarchy schema
+[dim]    Aliases: "sch", "schem"
 [dim]    Example: schema Level1 Level2 Level3   Default: Project Phase Task Subtask
 [white]    Changing the schema with existing data is only possible if the length of the new schema specified is the same as the old one.
 
 [bold white]  move <id> <target_parent_id>
-    Move a node below another node (level sensitive). Root can't be moved.          * NEW *
+    Move a node below another node (level sensitive). Root can't be moved.
+[dim]    Aliases: "m"
 [dim]    Example: move 01.01.01 01.03
 
 [bold white]  toggle <id>
     Toggle a node and all its children between done/undone
+[dim]    Aliases: "t"
 [dim]    Example: toggle 01.02
 
 [bold white]  undo
-    Reverts the last mutative change (create, edit, delete, toggle, move).          * NEW *
+[dim]    Aliases: "u"
+    Reverts the last mutative change (create, edit, delete, toggle, move).
 
 [bold white]  redo
-    Reapplies the last reverted mutative change.                                    * NEW *
+[dim]    Aliases: "r"
+    Reapplies the last reverted mutative change.
 
 
 [bold]🔍 Search
@@ -49,34 +57,48 @@
     Explicit name search
 [bold white]  search id <prefix>
     Search by exact or prefix ID
+[dim]    Aliases: "find"
 [dim]    Example: search plan
 
 [bold]📄 Display
 [bold white]  ls           List root nodes
+[dim]    Aliases: "list", "roots"
 [bold white]  tree         Print full tree view (indented format)
 [bold white]  ascii        ASCII-style tree branches
 [bold white]  table        Tabular view of all nodes
+[dim]    Aliases: "tab"
 [bold white]  clear        Clear the log
+[dim]    Aliases: "clr"
 
 [bold]💾 File I/O
 [bold white]  sample       Generate a sample node tree
+[dim]    Aliases: "demo"
+[bold white]  save         Save project tree manually.
+[dim]    Aliases: "s"
+
 
 [bold]🧹 Bulk Operations
 [bold white]  clearall
     Clear all nodes (requires confirmation)
-[bold white]  save
-    Save project tree manually.
+[bold white]  import [--file ...] [--mode ...]                                                  * NEW *
+[dim]    Aliases: "imp"
+    Imports project tree from a JSON file with three modes. Requires confirmation.
+[bold white]  export [--format] [--path] [--scope] [--columns] [--sort] [--no-completed]        * NEW *
+[dim]    Aliases: "ex", "exp", "output"
+    Exports project tree to CSV, PDF or JSON file.
 
 [bold]🧪 Misc
 [bold white]  help         Show this help message
+[dim]    Aliases: "?"
 
 [bold]⚙️ Config
+[dim]    Aliases: "cfg"
 [bold white]  config <autosave/assume_yes/logging> <on/off>         Turn auto-save / confirmation requests / logging on and off.
 
 [bold]🚪 Exit
 [bold white]  q / quit     Exit the application
 
-'load' command removed. Automatic saving and loading is active by default.
+Automatic saving and loading is active by default.
 Use the 'sample' command to create sample data, then view the result with one of the display commands.
-'abort' and 'confirm' commands are removed. For confirmation requests, use y/n.
-Command-specific help not yet implemented. For information about commands, please use the "help" command.
+For confirmation requests, use y/n.
+You can get command-specific help by entering the command blank. E.g. create

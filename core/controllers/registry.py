@@ -33,7 +33,7 @@ COMMANDS = {
     },
     "ls": {
         "type": "default",
-        "aliases": ["list"],
+        "aliases": ["list, roots"],
         "description": "List root nodes.",
         "usage": "ls",
         "binding": None,
@@ -47,7 +47,7 @@ COMMANDS = {
     },
     "tree": {
         "type": "default",
-        "aliases": ["t"],
+        "aliases": [],
         "description": "Show tree view of all nodes.",
         "usage": "tree",
         "binding": None,
@@ -61,7 +61,7 @@ COMMANDS = {
     },
     "ascii": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["asc"],
         "description": "Show ascii tree view of all nodes.",
         "usage": "ascii",
         "binding": None,
@@ -75,7 +75,7 @@ COMMANDS = {
     },
     "table": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["tab"],
         "description": "Show table view of all nodes.",
         "usage": "table",
         "binding": None,
@@ -91,7 +91,7 @@ COMMANDS = {
 
     "clear": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["clr"],
         "description": "Clear the terminal.",
         "usage": "clear",
         "binding": None,
@@ -124,7 +124,7 @@ COMMANDS = {
 
     "save": {
         "type": "default",
-        "aliases": ["demo"],
+        "aliases": ["s"],
         "description": "Save all data to file.",
         "usage": "save",
         "binding": None,
@@ -142,7 +142,7 @@ COMMANDS = {
 
     "create": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["c"],
         "description": "Create nodes.",
         "usage": "create <type> <name> [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD] [--parent <id>]",
         "binding": None,
@@ -180,7 +180,7 @@ COMMANDS = {
 
     "schema": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["sch", "schem"],
         "description": "Create or change tree schema.",
         "usage": "schema <level1> <level2> ...",
         "binding": None,
@@ -211,7 +211,7 @@ COMMANDS = {
 
     "delete": {
         "type": "default",
-        "aliases": ["del", "rm"],
+        "aliases": ["del", "remove", "rm"],
         "description": "Delete a node by ID.",
         "usage": "delete <id>",
         "binding": None,
@@ -233,7 +233,7 @@ COMMANDS = {
     },
     "edit": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["e"],
         "description": "Edit a node by ID.",
         "usage": "edit <id> [--name \"...\"] [--desc \"...\"] [--full \"...\"] [--deadline YYYY-MM-DD]",
         "binding": None,
@@ -294,7 +294,7 @@ COMMANDS = {
     },
     "toggle": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["t"],
         "description": "Toggle a node's completion state by ID (recursively).",
         "usage": "toggle <id>",
         "binding": None,
@@ -333,7 +333,7 @@ COMMANDS = {
     },
     "config": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["cfg"],
         "description": "Set a boolean configuration value.",
         "usage": "config <setting> <on|off>",
         "binding": None,
@@ -360,7 +360,7 @@ COMMANDS = {
     },
     "undo": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["u"],
         "description": "Undo last change.",
         "usage": "undo",
         "binding": "u",
@@ -375,7 +375,7 @@ COMMANDS = {
     },
     "redo": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["r"],
         "description": "Redo last undone change.",
         "usage": "redo",
         "binding": "r",
@@ -390,7 +390,7 @@ COMMANDS = {
     },
     "move": {
         "type": "default",
-        "aliases": [],
+        "aliases": ["m"],
         "description": "Move a child node below another node.",
         "usage": "move <id> <target_parent_id>",
         "binding": None,
@@ -412,7 +412,7 @@ COMMANDS = {
 
     "export": {
         "type": "default",
-        "aliases": ["ex"],
+        "aliases": ["ex", "exp", "output"],
         "description": "Export nodes to CSV, PDF or JSON.",
         "usage": "export [--format csv|pdf|json] [--path <file>] [--scope all|current|subtree:<id>|filter:<query>] "
                  "[--columns col1,col2,...] [--sort <col:asc|desc>] [--no-completed]",
@@ -449,6 +449,38 @@ COMMANDS = {
             "export_failed": "export.failed"
         }
     },
+    "import": {
+        "type": "default",
+        "aliases": ["imp"],
+        "description": "Import JSON (replace|append|merge).",
+        "usage": "import --file <path> [--mode replace|append|merge]",
+        "binding": None,
+        "require_data": False,
+        "mutate": True,
+        "mutate_config": False,
+        "destructive": True,
+        "params": {
+            "positionals": [],
+            "options": {
+            "--file": "file",
+            "--mode": "mode"
+            },
+            "defaults": {
+            "file": None,
+            "mode": "append"
+            }
+        },
+        "handler": "core.services.import.import_handler",
+        "messages": {
+            "file_missing":   "import.file_missing",
+            "parse_error":    "import.parse_error",
+            "invalid_mode":   "import.invalid_mode",
+            "replaced":       "import.replaced",
+            "appended":       "import.appended",
+            "merged":         "import.merged"
+        }
+    },
+
 
     
 }

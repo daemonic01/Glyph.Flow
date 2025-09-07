@@ -212,6 +212,30 @@ Generates a pre-filled sample tree to experiment with.
 
 Clears all project nodes. Requires confirmation.
 
+### `import [--file ...] [--mode ...]`
+
+Imports project tree from a JSON file with three modes. Requires confirmation.
+Flags:
+- `--file`: File path. e.g. D:/datatoimport/data.json
+- `--mode`: The method of attachment.
+Modes:
+      - `append`: Simply appends the new data to the existing data.
+      - `replace`: Replaces the entire data set with the new data.
+      - `merge`: Replaces identical nodes based on ID, creates new nodes in case of new ID.
+
+### `export [--format ...] [--path ...] [--scope ...] [--columns ...] [--sort ...] [--no-completed]`
+
+Exports project tree to CSV, PDF or JSON file.
+Flags:
+- `--format csv|pdf|json`: File format. Can be 'csv', 'pdf' or 'json'.
+- `--path <filepath>`: File path. e.g. D:/exportpath/
+- `--scope all|current|subtree:<id>|filter<query>:`: The range of nodes to be exported. (default: all; current isn't working yet)
+      With filter you can search by ID, name, type, short and full description. It searches in all of them (keyword filter).
+      E.g. --scope filter:Task (exports only Task type nodes)
+- `--columns <col1>, <col2>`: 
+- `--sort <col:asc/desc>`: Sorting option for exported nodes. e.g. --sort name:desc
+- `--no-completed`: Export everything but finished nodes.
+
 ---
 
 ## 🧪 Miscellaneous

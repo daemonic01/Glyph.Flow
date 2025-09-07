@@ -430,6 +430,45 @@
     }
   },
 
+  "import": {
+    "file_missing": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "No such file in the specified path: {file}"
+    },
+    "parse_error": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "The format or content of the file '{file}' you are trying to import is incorrect. Only JSON files can be imported. The JSON must be a list of node objects. Details: {error}"
+    },
+    "invalid_mode": {
+      "level": "ERROR",
+      "badge": "ERROR",
+      "color": "red",
+      "text": "Incorrect mode: {mode}. Please use 'replace', 'append' or 'merge'."
+    },
+    "replaced": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Data replaced with {file} | Removed {removed} and created {created} nodes."
+    },
+    "appended": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Data appended from {file}. Created: {created} nodes."
+    },
+    "merged": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Data merged with {file}. Updated {updated} and created {created} nodes."
+    }
+  },
+
   "export": {
     "success": {
       "level": "SUCCESS",

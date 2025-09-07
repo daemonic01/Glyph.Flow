@@ -57,13 +57,12 @@ def load_node_tree(ctx) -> List[Node]:
 
 
 
-def delete_data_file(ctx, filename: str) -> bool:
+def delete_data_file(ctx):
     """Delete the node data file if it exists. Returns True if deleted."""
-    
     DATA_PATH = BASE_DIR / ctx.config.get("paths.data")
-
-    if os.path.exists(filename):
-        os.remove(filename)
+    
+    if os.path.exists(DATA_PATH):
+        os.remove(DATA_PATH)
         return True
     return False
 
