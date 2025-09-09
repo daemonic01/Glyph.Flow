@@ -100,6 +100,12 @@
       "color": "green",
       "text": "Sample tree created."
     },
+    "bigsample_tree_created": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Stresstest sample tree created. Created {nodes} nodes in {time_sec} sec."
+    },
     "manual_save_completed":{
       "level": "SUCCESS",
       "badge": "OK",

@@ -121,6 +121,22 @@ COMMANDS = {
             "success":                  "file.sample_tree_created"
         }
     },
+    "bigsample": {
+        "type": "default",
+        "aliases": ["bigdemo", "stresstest"],
+        "description": "Create 10k+ demo/sample project tree.",
+        "usage": "bigsample",
+        "binding": None,
+        "require_data": False,
+        "mutate": True,
+        "mutate_config": False,
+        "destructive": False,
+        "params": [],
+        "handler": "core.handlers.bigsample.bigsample_handler",
+        "messages": {
+            "success":                  "file.bigsample_tree_created"
+        }
+    },
 
     "save": {
         "type": "default",
