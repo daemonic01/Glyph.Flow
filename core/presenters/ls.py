@@ -17,5 +17,9 @@ def ls_handler(ctx):
         ctx.app.output_widget.write("[bold white]\nRoot nodes:")
         for n in ctx.app.nodes:
             ctx.app.output_widget.write(f"[#FDC483]- {n.name} ({n.type}, ID = {n.id})")
+
+            if ctx.config.get("test_mode") == True:
+                from core.controllers.command_result import CommandResult
+                return CommandResult(code="success", outcome=True)
     else:
         ctx.log.key("file.no_data")

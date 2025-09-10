@@ -70,7 +70,7 @@ We’re just getting started. Upcoming ideas:
 ```bash
 git clone https://github.com/<your-username>/Glyph.Flow.git
 cd Glyph.Flow
-pip install requirements.txt
+pip install -r requirements.txt
 python main.py
 
 ```

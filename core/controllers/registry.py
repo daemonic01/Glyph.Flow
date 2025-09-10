@@ -137,6 +137,29 @@ COMMANDS = {
             "success":                  "file.bigsample_tree_created"
         }
     },
+    "test": {
+        "type": "default",
+        "aliases": ["t", "qa", "selftest"],
+        "description": "Run internal tests: files, config, commands, or all.",
+        "usage": "test <config|cfg | files|integrity | cmd|commands | all|overall>",
+        "binding": None,
+        "require_data": False,
+        "mutate": False,
+        "mutate_config": False,
+        "destructive": True,
+        "params": {
+            "positionals": ["target"],
+            "options": {},
+            "defaults": { "target": "all" }
+        },
+        "handler": "core.services.test.test_handler",
+        "messages": {
+            "success": "test.success",
+            "partial": "test.partial",
+            "error": "test.error"
+        }
+    },
+    
 
     "save": {
         "type": "default",
@@ -410,7 +433,7 @@ COMMANDS = {
         "description": "Move a child node below another node.",
         "usage": "move <id> <target_parent_id>",
         "binding": None,
-        "require_data": False,
+        "require_data": True,
         "mutate": True,
         "mutate_config": False,
         "destructive": False,

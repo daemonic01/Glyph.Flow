@@ -40,7 +40,7 @@ class Command:
     - Performs autosave if configured and the command mutates data.
     """
 
-    def __init__(self, ctx, name, raw, spec, params, handler, mutate, mutate_config, destructive):
+    def __init__(self, ctx, name, raw, spec, require_data, params, handler, mutate, mutate_config, destructive):
         """
         Args:
             ctx: Application context (services, log, config, nodes, etc.)
@@ -57,6 +57,7 @@ class Command:
         self.name = name
         self.raw = raw
         self.spec = spec
+        self.require_data = require_data
         self.params = params or {}
         self.handler = handler
         self.state = CommandState.INIT
@@ -117,9 +118,13 @@ class Command:
         Returns:
             CommandResult or None
         """
+        if self.require_data and not self.ctx.nodes:
+            if not self.ctx.config.get("test_mode"):
+                self.ctx.log.error("No data loaded.")
+            return CommandResult(code="no_data_loaded", outcome=False)
 
         if self.destructive and not self.ctx.config.get("assume_yes", False, bool) and not self._confirmed:
-            self.ctx.confirm.request(self, prompt=f"Execute '{self.name}'? This cannot be undone. (y/n)")
+            self.ctx.confirm.request(self, prompt=f"Execute '{self.name}'? (y/n)")
             self.paused = True
             return
 
@@ -138,7 +143,9 @@ class Command:
         # [TELL]
         self.state = CommandState.TELL
         try:
-            self._tell(result, None)
+            # mute if in test mode (test cmd)
+            if self.ctx.config.get("test_mode") == False:
+                self._tell(result, None)
         except CommandError as e:
             self.state = _PHASE_ERR["TELL"]; self._tell(None, e); return None
         except Exception as e:
@@ -149,20 +156,21 @@ class Command:
         # [AUTOSAVE] (do it centrally if command mutates)
         success = isinstance(result, CommandResult) and bool(getattr(result, "outcome", False))
 
-        if success and self.mutate and self.ctx.config.get("autosave", True, bool):
-            from core.data_io import save_node_tree
-            try:
-                save_node_tree(self.ctx)
-                self.ctx.log.key("system.autosave_done")
-            except Exception as e:
-                self.ctx.log.key("system.autosave_failed", error=e)
+        if self.ctx.config.get("test_mode") == False:
+            if success and self.mutate and self.ctx.config.get("autosave", True, bool):
+                from core.data_io import save_node_tree
+                try:
+                    save_node_tree(self.ctx)
+                    self.ctx.log.key("system.autosave_done")
+                except Exception as e:
+                    self.ctx.log.key("system.autosave_failed", error=e)
 
-        if success and self.mutate_config:
-            try:
-                self.ctx.config.save()
-                self.ctx.log.key("system.config_save_done")
-            except Exception as e:
-                self.ctx.log.key("system.config_save_failed", error=e)
+            if success and self.mutate_config:
+                try:
+                    self.ctx.config.save()
+                    self.ctx.log.key("system.config_save_done")
+                except Exception as e:
+                    self.ctx.log.key("system.config_save_failed", error=e)
 
 
         # record diff if provided by handler

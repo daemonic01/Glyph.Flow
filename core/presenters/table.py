@@ -30,6 +30,10 @@ def table_handler(ctx):
         
         ctx.app.output_widget.write("[bold #9c1717]\nTable view:")
         ctx.app.output_widget.write(table)
+
+        if ctx.config.get("test_mode") == True:
+            from core.controllers.command_result import CommandResult
+            return CommandResult(code="success", outcome=True)
         
 
 def _add_node_to_table(node: Node, table):

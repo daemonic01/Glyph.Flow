@@ -1,0 +1,12 @@
+version
+paths
+node_properties
+default_schema
+custom_schema
+logging
+test_mode
+log
+autosave
+assume_yes
+command_history_maxlen
+undo_redo_limit

@@ -1,4 +1,3 @@
-# config_handler.py  (or glyphflow/config/vault.py)
 from __future__ import annotations
 import json
 import os
@@ -13,6 +12,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "data": "data/node_data.json",
         "help": "assets/help.txt",
         "messages": "loc/en/messages.json",
+        "file_tests": "tests/files.txt",
         "syslog": "logs/app.log"
     },
     "node_properties": {
@@ -22,6 +22,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "default_schema": ["Project", "Phase", "Task", "Subtask"],
     "custom_schema": [],
     "logging": True,
+    "test_mode": False,
     "log": {"rotate": {"max_bytes": 262144, "backup_count": 5}},
     "autosave": True,
     "assume_yes": False,

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "01",
+    "name": "Project: Alpha",
+    "type": "Project",
+    "created_at": "2025-09-10",
+    "deadline": "",
+    "short_desc": "",
+    "full_desc": "",
+    "completed": false,
+    "children": [
+      {
+        "id": "01.01",
+        "name": "Phase I.",
+        "type": "Phase",
+        "created_at": "2025-09-10",
+        "deadline": "",
+        "short_desc": "",
+        "full_desc": "",
+        "completed": false,
+        "children": [
+          {
+            "id": "01.01.01",
+            "name": "Task I.",
+            "type": "Task",
+            "created_at": "2025-09-10",
+            "deadline": "",
+            "short_desc": "",
+            "full_desc": "",
+            "completed": false,
+            "children": []
+          },
+          {
+            "id": "01.01.02",
+            "name": "Task II.",
+            "type": "Task",
+            "created_at": "2025-09-10",
+            "deadline": "",
+            "short_desc": "",
+            "full_desc": "",
+            "completed": false,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "01.02",
+        "name": "Phase II.",
+        "type": "Phase",
+        "created_at": "2025-09-10",
+        "deadline": "",
+        "short_desc": "",
+        "full_desc": "",
+        "completed": false,
+        "children": [
+          {
+            "id": "01.02.01",
+            "name": "Task I.",
+            "type": "Task",
+            "created_at": "2025-09-10",
+            "deadline": "",
+            "short_desc": "",
+            "full_desc": "",
+            "completed": false,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "01.03",
+        "name": "Phase III.",
+        "type": "Phase",
+        "created_at": "2025-09-10",
+        "deadline": "",
+        "short_desc": "",
+        "full_desc": "",
+        "completed": false,
+        "children": []
+      }
+    ]
+  }
+]

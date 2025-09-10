@@ -10,6 +10,9 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.platypus import SimpleDocTemplate, Table as RLTable, TableStyle, Paragraph, Spacer
 
 
@@ -82,17 +85,19 @@ def export_handler(ctx, *,
             outcome=True
         )
 
-    except Exception as exc:
-        ctx.log.error(f"Export failed: {exc}")
+    except Exception as e:
+        ctx.log.error(f"Export failed: {e}")
         return CommandResult(
             code="export_failed",
-            params={"format": fmt, "path": str(out_path), "error": str(exc)},
+            params={"format": fmt, "path": str(out_path), "error": str(e)},
             outcome=False
         )
 
 
 
 # Service
+
+
 
 PREFERRED_ORDER = [
     # base fields from Node
@@ -116,6 +121,11 @@ class ExportOptions:
 class ExportService:
     def __init__(self, ctx):
         self.ctx = ctx
+
+        # FONTS
+        FONT_REGULAR = self.ctx.base_dir / "assets/fonts/NotoSansJP-Regular.ttf"
+        pdfmetrics.registerFont(TTFont("NotoSans", FONT_REGULAR))
+        pdfmetrics.registerFont(UnicodeCIDFont("HeiseiMin-W3"))
 
     # PUBLIC
 
@@ -192,7 +202,7 @@ class ExportService:
         p_style = ParagraphStyle(
             "Cell",
             parent=styles["BodyText"],
-            fontName="Helvetica",
+            fontName="NotoSans",
             fontSize=8,
             leading=10,
         )
@@ -266,7 +276,7 @@ class ExportService:
         # header & footer callbacks
         def _header_footer(canvas, doc):
             canvas.saveState()
-            canvas.setFont("Helvetica", 8)
+            canvas.setFont("NotoSans", 8)
             canvas.drawRightString(pagesize[0] - 15 * mm, 10 * mm, f"Page {doc.page}")
             canvas.restoreState()
 

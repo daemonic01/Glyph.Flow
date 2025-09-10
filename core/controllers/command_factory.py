@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterable, Optional, List
 
 from .command_core import Command
 from core.errors.command_errors import (
-    UnknownCommandError, ParseError, ValidationError,
+    UnknownCommandError, ParseError
 )
 from .registry import COMMANDS
 
@@ -78,7 +78,7 @@ def _strip_variadic_marker(key: str) -> str:
 
 
 
-def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
+def _parse_by_schema(ctx, argv: List[str], schema: Any) -> Dict[str, Any]:
     """
     Parse arguments based on a schema definition.
 
@@ -101,6 +101,7 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
     Raises:
         ParseError: On unknown tokens, missing values, or unsupported schema.
     """
+    
 
     if not schema:
         return {}
@@ -142,7 +143,7 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
 
             raise ParseError(f"Unknown token: {argv[i]}")
         return params
-
+    
     # --- DICT SCHEMA (positionals + options + defaults) ---
     if isinstance(schema, dict):
         pos_keys_raw: List[str] = (schema.get("positionals", []) or [])
@@ -175,7 +176,7 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
             else:
                 
                 pass
-
+        
         # parse variadic positional
         if variadic_key:
             values: List[str] = []
@@ -189,24 +190,28 @@ def _parse_by_schema(argv: List[str], schema: Any) -> Dict[str, Any]:
             spec = opt_map.get(tok)
             if spec is None:
                 raise ParseError(f"Unknown token: {tok}")
-
+            
             # boolean flag option
             if isinstance(spec, dict) and spec.get("flag"):
                 dest = spec.get("to") or spec.get("name") or tok.lstrip("-")
                 params[dest] = True
                 i += 1
                 continue
-
+            
             # key-value option
             dest = spec if isinstance(spec, str) else (spec.get("to") or spec.get("name"))
             if i + 1 >= len(argv) or argv[i + 1].startswith("-"):
                 raise ParseError(f"Missing value for option: {tok}")
             params[dest] = argv[i + 1]
             i += 2
-
+        
         return params
 
     raise ParseError("Unsupported schema type for params")
+
+
+
+
 
 
 
@@ -235,6 +240,7 @@ def summon(raw: str, ctx) -> Command:
         ValidationError: If spec requires data but no data is loaded.
     """
     parts = shlex.split(raw)
+    
     if not parts:
         raise ParseError("Empty input")
 
@@ -254,14 +260,13 @@ def summon(raw: str, ctx) -> Command:
         else:
             ctx.log.info(f"Usage: {usage}")
         return None
-
+    
     # enforce data requirement
-    if spec.get("require_data") and not ctx.nodes:
-        raise ValidationError("No data loaded.")
-
+    require_data = spec.get("require_data")
+    
     # parse arguments
-    params = _parse_by_schema(argv, spec.get("params"))
-
+    params = _parse_by_schema(ctx, argv, spec.get("params"))
+    
     # resolve handler
     handler_path = spec.get("handler")
     if not handler_path:
@@ -273,13 +278,14 @@ def summon(raw: str, ctx) -> Command:
     destructive = bool(spec.get("destructive", False))
 
     spec = dict(spec)
-
+    
 
     return Command(
         ctx=ctx,
         name=name,
         raw=raw,
         spec=spec,
+        require_data=require_data,
         params=params,
         handler=handler,
         mutate=mutate,

@@ -1,0 +1,43 @@
+[
+    { "cmd": "help", "expect": "success" },
+    { "cmd": "ls", "expect": "no_data_loaded" },
+    { "cmd": "tree", "expect": "no_data_loaded" },
+    { "cmd": "ascii", "expect": "no_data_loaded" },
+    { "cmd": "table", "expect": "no_data_loaded" },
+
+
+    { "cmd": "clear", "expect": "success" },
+    { "cmd": "config FAKE_KEY on", "expect": "unknown_key" },
+    { "cmd": "config autosave maybe", "expect": "invalid_value" },
+    { "cmd": "config logging on", "expect": "no_change" },
+    { "cmd": "config logging off", "expect": "set_success" },
+    { "cmd": "config logging on", "expect": "set_success" },
+    { "cmd": "export --format csv", "expect": "no_data_loaded" },
+    { "cmd": "import --file G:/data/nodes.json", "expect": "file_missing" },
+    { "cmd": "import --file ./tests/test_data.json --mode invalidmode", "expect": "invalid_mode" },
+    { "cmd": "import --file ./tests/wrong_test_data.csv --mode replace", "expect": "parse_error" },
+    { "cmd": "import --file ./tests/test_data.json --mode replace", "expect": "replaced" },
+    { "cmd": "import --file ./tests/test_data.json --mode append", "expect": "appended" },
+    { "cmd": "import --file ./tests/test_data.json --mode merge", "expect": "merged" },
+    { "cmd": "clearall", "expect": "file_not_found" },
+    { "cmd": "save", "expect": "manual_save_completed" },
+    { "cmd": "schema A B C D", "expect": "switch_success" },
+    { "cmd": "schema --default", "expect": "switch_default_success" },
+
+
+    { "cmd": "create Nothing TempProject", "expect": "root_type_error" },
+    { "cmd": "create Phase TempPhase --parent 01", "expect": "parent_not_found_error" },
+    { "cmd": "create Project TempProject --deadline 2030-10-10", "expect": "success" },
+    { "cmd": "create Phase TempPhase2 --deadline 2000-10-10 --parent 01", "expect": "past_date_error" },
+    { "cmd": "create Phase TempPhase2 --deadline 2031-10-10 --parent 01", "expect": "deadline_too_early" },
+    { "cmd": "undo", "expect": "success" },
+    { "cmd": "redo", "expect": "success" },
+    { "cmd": "clearall", "expect": "clear_done" },
+
+    { "cmd": "delete 01", "expect": "no_data_loaded" },
+    { "cmd": "edit 01 --name X", "expect": "no_data_loaded" },
+    { "cmd": "toggle 01", "expect": "no_data_loaded" },
+    { "cmd": "move 01 01.02", "expect": "no_data_loaded" },
+    { "cmd": "search anything", "expect": "no_data" }
+
+]

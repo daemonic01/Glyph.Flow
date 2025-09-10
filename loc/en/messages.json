@@ -60,6 +60,26 @@
       "text": "Unexpected error! Please create a new issue in the project's repository on GitHub! This would help me a lot. Thank you."
     }
   },
+  "test": {
+    "success": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Test completed! Report:\n{report}"
+    },
+    "partial": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Test completed! Report:\n{report}"
+    },
+    "error": {
+      "level": "SUCCESS",
+      "badge": "OK",
+      "color": "green",
+      "text": "Test failed! Error: {e}"
+    }
+  },
   "config": {
     "unknown_key": {
       "level": "ERROR",

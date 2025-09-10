@@ -4,7 +4,11 @@
         "data": "data/node_data.json",
         "help": "assets/help.txt",
         "messages": "loc/en/messages.json",
+        "file_tests": "tests/files.txt",
         "syslog": "logs/app.log",
+        "config_keys_test": "tests/config.txt",
+        "cmd_test_data": "tests/cmd_test_data.json",
+        "cmd_test_no_data": "tests/cmd_test_no_data.json",
         "export": "export/"
     },
     "node_properties": {
@@ -24,6 +28,7 @@
         "Subtask"
     ],
     "logging": true,
+    "test_mode": false,
     "log": {
         "rotate": {
             "max_bytes": 262144,
@@ -33,5 +38,7 @@
     "autosave": true,
     "assume_yes": false,
     "command_history_maxlen": 50,
-    "undo_redo_limit": 50
+    "undo_redo_limit": 50,
+    "versioning": "0.1.0a9",
+    "versiossn": "0.1.0a9"
 }

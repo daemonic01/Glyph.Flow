@@ -118,7 +118,7 @@ class GlyphApp(App):
 
         
         self.input.focus()
-
+        
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle command input from the user and execute corresponding actions."""
@@ -178,7 +178,7 @@ class GlyphApp(App):
 
             self.log_widget.styles.width = "30%"
             self.output_widget.styles.width = "70%"
-
+            
 
             self.log_widget.styles.animate("opacity", 1.0, duration=0.25, easing="in_out_cubic")
             self.output_widget.styles.animate("opacity", 1.0, duration=0.25, easing="in_out_cubic")

@@ -1,0 +1,58 @@
+[
+  { "cmd": "help", "expect": "success" },
+  { "cmd": "ls", "expect": "success" },
+  { "cmd": "tree", "expect": "success" },
+  { "cmd": "ascii", "expect": "success" },
+  { "cmd": "table", "expect": "success" },
+
+
+  { "cmd": "clear", "expect": "success" },
+  { "cmd": "config FAKE_KEY on", "expect": "unknown_key" },
+  { "cmd": "config autosave maybe", "expect": "invalid_value" },
+  { "cmd": "config logging on", "expect": "no_change" },
+  { "cmd": "config logging off", "expect": "set_success" },
+  { "cmd": "config logging on", "expect": "set_success" },
+  { "cmd": "export --format csv --path ./tests/exports/test_exp.json", "expect": "success" },
+  { "cmd": "export --format invalidformat", "expect": "invalid_format" },
+  { "cmd": "import --file G:/data/nodes.json", "expect": "file_missing" },
+  { "cmd": "import --file ./tests/test_data.json --mode invalidmode", "expect": "invalid_mode" },
+  { "cmd": "import --file ./tests/wrong_test_data.csv --mode replace", "expect": "parse_error" },
+  { "cmd": "import --file ./tests/test_data.json --mode replace", "expect": "replaced" },
+  { "cmd": "import --file ./tests/test_data.json --mode append", "expect": "appended" },
+  { "cmd": "import --file ./tests/test_data.json --mode merge", "expect": "merged" },
+  { "cmd": "save", "expect": "manual_save_completed" },
+  { "cmd": "schema A B C", "expect": "length_mismatch" },
+  { "cmd": "schema A B C D", "expect": "switch_success" },
+  { "cmd": "schema --default", "expect": "switch_default_success" },
+  
+
+  { "cmd": "create Subtask TempSubtask --parent 01.01.01", "expect": "success" },
+  { "cmd": "create Subtask TempSubSubtask --parent 01.01.01.01", "expect": "tree_level_error" },
+  { "cmd": "create Project TempProject --deadline 2030-10-10", "expect": "success" },
+
+  { "cmd": "undo", "expect": "success" },
+  { "cmd": "redo", "expect": "success" },
+
+  { "cmd": "edit 09 --name NewName", "expect": "not_found" },
+  { "cmd": "edit 01 --name NewName", "expect": "edit_done" },
+  { "cmd": "edit 01 --deadline 2000-10-10", "expect": "past_date_error" },
+  { "cmd": "edit 01 --name NewName", "expect": "edit_no_change" },
+
+  { "cmd": "move 01 02", "expect": "move_root_error" },
+  { "cmd": "move 01.09 02", "expect": "node_not_found" },
+  { "cmd": "move 01.01 09", "expect": "target_parent_not_found" },
+  { "cmd": "move 01.01 01", "expect": "already_there" },
+  { "cmd": "move 01.01.01 01", "expect": "type_error" },
+  { "cmd": "move 01.01 02", "expect": "move_success" },
+
+  { "cmd": "delete 01.01.01", "expect": "deleted_child" },
+  { "cmd": "delete 09", "expect": "not_found" },
+  { "cmd": "delete 01", "expect": "deleted_root" },
+
+  { "cmd": "search ZZZZZZZZ", "expect": "search_no_matches" },
+  { "cmd": "search A", "expect": "search_results" },
+  { "cmd": "search id 01", "expect": "search_results" },
+
+
+  { "cmd": "bigsample", "expect": "success" }
+]
