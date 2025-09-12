@@ -100,7 +100,7 @@ class GlyphApp(App):
         self.output_widget = GlyphRichLog(highlight=False, markup=True, id="output-log", wrap=True, min_width=25)
         self.output_widget.border_title = "OUTPUT PANEL"
         self.input = Input(placeholder="Enter command (e.g. help, create, ls, save, tree, sample, config)", id="input")
-        self.footer = Static("A = Adjust Panels | T = Switch Theme", id="footer", markup=False)
+        self.footer = Static("A = Adjust Panels | T = Switch Theme | Q - Quit", id="footer", markup=False)
 
         self.footer_container = Container(
             self.input,
