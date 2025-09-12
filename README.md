@@ -26,8 +26,9 @@ Key ideas:
 
 ## 🎥 See it in action
 
-[![Demo Video](https://img.shields.io/badge/▶-Watch%20the%20demo-red)](https://github.com/user-attachments/assets/0a706a5a-91e9-4f22-8f0c-a5ba3e3c483a)
-[![Demo Video](https://img.shields.io/badge/▶-Watch%20the%20demo-red)](https://github.com/user-attachments/assets/cff273d6-08d5-4c76-a296-e0eb02c6004e)
+[![Demo Video 1](https://img.shields.io/badge/▶-Watch%20the%20demo-red)](https://github.com/user-attachments/assets/0a706a5a-91e9-4f22-8f0c-a5ba3e3c483a)
+
+[![Demo Video 2](https://img.shields.io/badge/▶-Watch%20the%20demo-red)](https://github.com/user-attachments/assets/cff273d6-08d5-4c76-a296-e0eb02c6004e)
 
 ---
 
