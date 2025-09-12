@@ -1,6 +1,6 @@
 from textual.app import App, ComposeResult
 from textual.containers import Container
-from textual.widgets import Input, RichLog, Label, Rule
+from textual.widgets import Input, RichLog, Label, Rule, Static
 from textual.containers import Vertical, Horizontal
 from textual.reactive import reactive
 from textual import events
@@ -17,6 +17,7 @@ from time import sleep as time_sleep
 from .gf_art import GlyphArt
 from core.config.config_vault import ConfigVault
 from core.glyph_nexus import GlyphNexus
+from pathlib import Path
 
 class GlyphRichLog(RichLog):
     def __init__(self, *args, buffer_cap=100, **kwargs):
@@ -51,19 +52,33 @@ class GlyphApp(App):
     CSS_PATH = "app.tcss"
     BINDINGS = [
         ("q", "quit", "Quit"),
-        ("a", "adjust", "Adjust")
+        ("a", "adjust", "Adjust"),
+        ("t", "switch_theme", "switch Theme")
     ]
     pending_confirm: Optional[tuple] = None
     nodes: list[Node] = reactive([])
 
-    
 
     def compose(self) -> ComposeResult:
+
+        image_map = {
+            "crimson": "assets/images/gf_art.png",
+            "arctic":  "assets/images/gf_art_arctic.png",
+            "desert":  "assets/images/gf_art_desert.png",
+            "*":       "assets/images/gf_art.png",
+        }
+        default_theme = self.config.get("theme", "crimson")
+
         self.output_focus = False
 
+        # prepare environment info box labels
         self.version_label = Label("", classes="InfoLabel")
         self.autosave_label = Label("", classes="InfoLabel")
         self.logging_label = Label("", classes="InfoLabel")
+
+        # prepare project info box labels
+        self.project_count_label = Label("", classes="DataInfoLabel")
+        self.project_status_label = Label("", classes="DataInfoLabel")
 
         self.header = Horizontal(
             Container(
@@ -72,8 +87,12 @@ class GlyphApp(App):
                 self.logging_label,
                 id="info-box"
             ),
-            GlyphArt(image_path="assets/images/gf_art.png"),
-            Container(),
+            GlyphArt(image_map, default_theme=default_theme, art_size=(100, 18)),
+            Container(
+                self.project_count_label,
+                self.project_status_label,
+                id="data-info-box"
+            ),
             id="header")
 
         self.log_widget = GlyphRichLog(highlight=False, markup=True, id="log", wrap=True, min_width=25)
@@ -81,11 +100,20 @@ class GlyphApp(App):
         self.output_widget = GlyphRichLog(highlight=False, markup=True, id="output-log", wrap=True, min_width=25)
         self.output_widget.border_title = "OUTPUT PANEL"
         self.input = Input(placeholder="Enter command (e.g. help, create, ls, save, tree, sample, config)", id="input")
+        self.footer = Static("A = Adjust Panels | T = Switch Theme", id="footer", markup=False)
+
+        self.footer_container = Container(
+            self.input,
+            Rule(line_style="solid"),
+            self.footer, id="footer-container"
+            
+        )
         yield Vertical(self.header,
                        Rule(line_style="double"),
                        Horizontal(self.log_widget, self.output_widget),
-                       self.input, id="TUI")
-
+                       self.footer_container
+                       )
+        
     def on_mount(self):
         # --- CONFIG ---
         self.ctx = GlyphNexus()
@@ -95,6 +123,9 @@ class GlyphApp(App):
         self.message_catalog = MessageCatalog.from_file(messages_path)
         self.confirm = ConfirmService(ctx=self.ctx)
         self.ctx.bind_app_core(app=self.app)
+
+        # --- THEME ---
+        self.apply_theme_from_json(self.ctx.base_dir / f"tui/palettes/{self.ctx.config.get("theme")}.json")
 
         # --- UI ---
         self.message_log = _Log(config=self.config)
@@ -110,6 +141,7 @@ class GlyphApp(App):
 
         # --- STARTUP ---
         self.refresh_header_from_config()
+        self.refresh_data_info_box()
         self.call_after_refresh(
         lambda: (
             self.ctx.log.key("system.startup_hint")
@@ -166,6 +198,23 @@ class GlyphApp(App):
                 event.prevent_default()
                 event.stop()
 
+    
+    
+    def action_switch_theme(self) -> None:
+        if self.ctx.config.get("theme") == "crimson":
+            self.ctx.config.edit("theme", "arctic")
+        elif self.ctx.config.get("theme") == "arctic":
+            self.ctx.config.edit("theme", "desert")
+        else:
+            self.ctx.config.edit("theme", "crimson")
+        self.apply_theme_from_json(self.ctx.base_dir / f"tui/palettes/{self.ctx.config.get("theme")}.json")
+        try:
+            self.query_one("#gf-logo", GlyphArt).theme_name = self.ctx.config.get("theme")
+        except Exception:
+            pass
+
+        self.refresh_css()
+        self.screen.refresh()
 
 
     async def action_adjust(self) -> None:
@@ -202,3 +251,36 @@ class GlyphApp(App):
         self.version_label.update(f"Active version: {self.ctx.config.get('version', 'unknown')}")
         self.autosave_label.update(f"Autosave: {'ON' if self.ctx.config.get('autosave') else 'OFF'}")
         self.logging_label.update(f"Logging: {'ON' if self.ctx.config.get('logging') else 'OFF'}")
+
+    def refresh_data_info_box(self):
+        self.project_count_label.update(f"Active projects: {len(self.ctx.app.nodes)}")
+        completed_count = len([p for p in self.ctx.app.nodes if p.completed])
+        self.project_status_label.update(f"In progress: {len(self.ctx.app.nodes) - completed_count} | Done: {completed_count}")
+
+
+
+    def apply_theme_from_json(app, json_path: str | Path) -> None:
+        import json
+        from pathlib import Path
+        from textual.theme import Theme
+        data = json.loads(Path(json_path).read_text(encoding="utf-8"))
+        colors = data.get("colors", {})
+
+        theme = Theme(
+            name=data.get("name", "custom"),
+            dark=bool(data.get("dark", True)),
+            primary=colors.get("primary"),
+            secondary=colors.get("secondary"),
+            accent=colors.get("accent"),
+            foreground=colors.get("foreground"),
+            background=colors.get("background"),
+            surface=colors.get("surface"),
+            panel=colors.get("panel"),
+            success=colors.get("success"),
+            warning=colors.get("warning"),
+            error=colors.get("error"),
+            boost=colors.get("boost"),
+            variables=data.get("variables") or {},
+        )
+        app.register_theme(theme)
+        app.theme = theme.name 

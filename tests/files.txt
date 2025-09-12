@@ -42,6 +42,15 @@ core/services/undo_redo.py
 core/utils.py
 loc/en/messages.json
 main.py
+tests/cmd_test_data.json
+tests/cmd_test_no_data.json
+tests/config.txt
+tests/files.txt
+tests/test_data.json
+tests/wrong_test_data.csv
 tui/app.py
 tui/app.tcss
 tui/gf_art.py
+tui/palettes/crimson.json
+tui/palettes/arctic.json
+tui/palettes/desert.json

@@ -34,6 +34,7 @@
     { "cmd": "redo", "expect": "success" },
     { "cmd": "clearall", "expect": "clear_done" },
 
+    
     { "cmd": "delete 01", "expect": "no_data_loaded" },
     { "cmd": "edit 01 --name X", "expect": "no_data_loaded" },
     { "cmd": "toggle 01", "expect": "no_data_loaded" },

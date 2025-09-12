@@ -1,7 +1,10 @@
 import json, os, time, shutil
 from pathlib import Path
+from datetime import datetime
 from core.controllers.command_result import CommandResult
 from core.controllers.command_factory import summon
+
+_TEST_CMD_NAMES = {"test", "t", "qa", "selftest"}
 
 class InternalTestError(Exception):
     pass
@@ -30,32 +33,36 @@ def test_handler(ctx, *, target: str = "all") -> CommandResult:
     overall_ok = True
     try:
         if "files" in sections:
-            ok, sec, lines = _run_files(ctx, base_dir)
+            ok, sec, lines, files_ok_count, files_all_entries = _run_files(ctx, base_dir)
             report += ["=== FILES ===", *lines]
             stats["files_sec"] = sec
             overall_ok &= ok
 
         if "config" in sections:
-            ok, sec, lines = _run_config(ctx, base_dir)
+            ok, sec, lines, config_ok_count, config_all_keys = _run_config(ctx, base_dir)
             report += ["\n=== CONFIG ===", *lines]
             stats["config_sec"] = sec
             overall_ok &= ok
 
         if "cmd" in sections:
-            ok, sec, lines = _run_commands(ctx)
+            ok, sec, lines, cmd_ok_count, cmd_all_tested = _run_commands(ctx)
             report += ["\n=== COMMANDS ===", *lines]
             stats["commands_sec"] = sec
             overall_ok &= ok
 
         total = time.perf_counter() - start_all
         report += [
-            "\n=== SUMMARY ===",
-            f"sections: {', '.join(sections)}",
-            f"time: files={stats.get('files_sec', 0):.4f}s "
-            f"config={stats.get('config_sec', 0):.4f}s "
-            f"commands={stats.get('commands_sec', 0):.4f}s "
-            f"total={total:.4f}s"
+            "\n[white]=== SUMMARY ===",
+            f"Tested: {', '.join(sections)}"
         ]
+        if "files" in sections:
+            report.append(f"Files: {files_ok_count}/{files_all_entries} in {stats.get('files_sec', 0):.4f}s ")
+        if "config" in sections:
+            report.append(f"Config: {config_ok_count}/{config_all_keys} in {stats.get('config_sec', 0):.4f}s ")
+        if "cmd" in sections:
+            report.append(f"Commands: {cmd_ok_count}/{cmd_all_tested} in {stats.get('commands_sec', 0):.4f}s ")
+        report.append(f"Total = {total:.4f}s")
+        report.append(f"\nReport file saved to tests/reports.")
 
         
         code = "success" if overall_ok else "partial"
@@ -63,6 +70,7 @@ def test_handler(ctx, *, target: str = "all") -> CommandResult:
     except Exception as e:
         return CommandResult(code=code, params={"error": e}, outcome=overall_ok)
     finally:
+        ctx.app.refresh_data_info_box()
         # Reset config
         ctx.config.edit("assume_yes", False)
         ctx.config.edit("test_mode", False)
@@ -70,6 +78,12 @@ def test_handler(ctx, *, target: str = "all") -> CommandResult:
         # Delete test exports if they exist
         if os.path.exists(ctx.base_dir / "tests/exports"):
             shutil.rmtree(ctx.base_dir / "tests/exports")
+        # Export report
+        out_dir = Path(getattr(ctx, "base_dir", ".")) / "tests/reports"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y_%m_%d_%H%M")   # pl. 2025_09_12_1855
+        report_path = out_dir / f"test_report_{stamp}.txt"
+        report_path.write_text("\n".join(report), encoding="utf-8")
 
 
 
@@ -105,11 +119,13 @@ def _run_files(ctx, base_dir: Path):
         tag = "SUCCESS" if exists else "FAILED"
         if exists:
             ok_count += 1
-        lines.append(f"[{tag}] {fp}")
+            lines.append(f"[{tag}] {fp}")
+        else:
+            lines.append(f"[red][{tag}] {fp}[/]")
 
     sec = time.perf_counter() - t0
     lines.append(f"-> total {len(entries)} | ok {ok_count} | time {sec:.4f}s")
-    return ok_count == len(entries), sec, lines
+    return ok_count == len(entries), sec, lines, ok_count, len(entries)
 
 
 def _run_config(ctx, base_dir: Path):
@@ -136,7 +152,7 @@ def _run_config(ctx, base_dir: Path):
     if cfg_path.exists():
         lines.append(f"[SUCCESS] config file exists: {cfg_path}")
     else:
-        lines.append(f"[FAILED] config file missing: {cfg_path}")
+        lines.append(f"[red][FAILED] config file missing: {cfg_path}")
         ok = False
 
     # list of neccessary keys
@@ -148,7 +164,7 @@ def _run_config(ctx, base_dir: Path):
         try:
             required = [ln.strip() for ln in kpath.read_text(encoding="utf-8").splitlines() if ln.strip()]
         except Exception as e:
-            lines.append(f"[FAILED] config_keys file read error: {e}")
+            lines.append(f"[red][FAILED] config_keys file read error: {e}")
             ok = False
             required = []
     else:
@@ -173,7 +189,10 @@ def _run_config(ctx, base_dir: Path):
 
     sec = time.perf_counter() - t0
     lines.append(f"-> time {sec:.4f}s")
-    return ok, sec, lines
+    return ok, sec, lines, len(required)-len(missing), len(required)
+
+
+
 
 
 def _run_commands(ctx):
@@ -216,7 +235,7 @@ def _run_commands(ctx):
     
     sec = time.perf_counter() - t0
     lines.append(f"-> commands {total_ok}/{total} ok | time {sec:.4f}s")
-    return ok, sec, lines
+    return ok, sec, lines, total_ok, total
 
 
 # -------------------------
@@ -250,6 +269,14 @@ def _exec_case(ctx, case, lines):
     expect = case.get("expect", "success")
     t0 = time.perf_counter()
     cmd = summon(raw, ctx)
+
+    # self-invocation guard
+    name = getattr(cmd, "name", None)
+    verb = (name or raw.split()[0]).lower()
+    if verb in _TEST_CMD_NAMES:
+        lines.append(f"[yellow][SKIPPED] {raw} -> self-invocation blocked[/]")
+        return 0.0, False
+
     res = cmd.execute()
     dt = time.perf_counter() - t0
     got = getattr(res, "code", None)

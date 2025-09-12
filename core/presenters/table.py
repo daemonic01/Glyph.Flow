@@ -14,7 +14,7 @@ def table_handler(ctx):
         """
         from rich.table import Table
 
-        table = Table(show_header=True, header_style="bold #9c1717", border_style="bold #9c1717")
+        table = Table(show_header=True, header_style="bold #9c1717" if ctx.config.get("theme") == "crimson" else "bold #366b68", border_style="bold #9c1717" if ctx.config.get("theme") == "crimson" else "bold #4a8784")
         table.add_column("ID", style="white", width=12)
         table.add_column("Name", style="white", no_wrap=True)
         table.add_column("Type", style="cyan", width=10)
@@ -28,7 +28,7 @@ def table_handler(ctx):
             _add_node_to_table(root, table)
 
         
-        ctx.app.output_widget.write("[bold #9c1717]\nTable view:")
+        ctx.app.output_widget.write("[bold white]\nTable view:")
         ctx.app.output_widget.write(table)
 
         if ctx.config.get("test_mode") == True:

@@ -60,8 +60,8 @@ def config_handler(ctx, *, setting: Optional[str] = None, value: Optional[str] =
     if not cfg_key:
         return CommandResult(code="unknown_key", params={"setting": setting}, outcome=False)
 
-
     b = _parse_bool(value)
+
     if b is None:
         return CommandResult(code="invalid_value", params={"k": key_in}, outcome=False)
 

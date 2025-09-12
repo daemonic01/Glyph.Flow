@@ -44,6 +44,7 @@ def toggle_handler(ctx, *, id: Optional[str] = None) -> CommandResult:
 
     name = getattr(node, "name", id)
     diff = Diff(forward=forward_ops, backward=backward_ops)
+    ctx.app.refresh_data_info_box()
 
     return CommandResult(
         code="toggled",

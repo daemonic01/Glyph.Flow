@@ -204,6 +204,10 @@ Saves the current node tree to `node_data.json`
 
 Generates a pre-filled sample tree to experiment with.
 
+### `bigsample`
+
+Generate a pre-filled big (11111 node) test sample node tree.
+
 ---
 
 ## 🧹 Bulk Operations
@@ -243,6 +247,10 @@ Flags:
 ### `help`
 
 Displays this help message.
+
+### `test <all|files|config|cmd>`
+
+Test file integrity, config file, command functionality or both. It creates report files in tests/reports.
 
 ---
 

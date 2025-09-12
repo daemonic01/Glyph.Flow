@@ -1,5 +1,6 @@
 {
-    "version": "0.1.0a9",
+    "version": "0.1.0",
+    "theme": "arctic",
     "paths": {
         "data": "data/node_data.json",
         "help": "assets/help.txt",
@@ -38,7 +39,5 @@
     "autosave": true,
     "assume_yes": false,
     "command_history_maxlen": 50,
-    "undo_redo_limit": 50,
-    "versioning": "0.1.0a9",
-    "versiossn": "0.1.0a9"
+    "undo_redo_limit": 50
 }

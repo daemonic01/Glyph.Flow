@@ -119,7 +119,8 @@ def create_handler(
         "node_id": new_node.id
     }]
     diff = Diff(forward=forward, backward=backward)
-
+    ctx.app.refresh_data_info_box()
+    
     return CommandResult(
         code="success",
         params={

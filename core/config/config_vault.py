@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Union
 
 DEFAULT_CONFIG: Dict[str, Any] = {
-    "version": "0.1.0a9",
+    "version": "0.1.0",
+    "theme": "crimson",
     "paths": {
         "data": "data/node_data.json",
         "help": "assets/help.txt",

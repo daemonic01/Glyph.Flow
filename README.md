@@ -9,18 +9,18 @@
 ## ⚡ Why Glyph.Flow?
 
 Because you don’t need *another* bloated task manager.  
-You need something **fast, focused, and terminal-native** — a tool that keeps up with your brain, not slows it down.
+You need something **fast, focused, and terminal-native** - a tool that keeps up with your brain, not slows it down.
 
 **Glyph.Flow** lets you map out entire workflows (Projects → Phases → Tasks → Subtasks) and control them with pure keystrokes.  
 No mouse. No clutter. Just flow.  
 
 Key ideas:
-- **Hierarchical workflows** → Model complex projects, not just checklists.
-- **Diff-based undo/redo** → Rare in TUIs, a game-changer for experimentation.
-- **Autosave & recovery** → Kill the terminal? Pick up right where you left off.
-- **Export anywhere** → JSON, CSV, PDF — your data, your rules.
-- **Schema freedom** → Redefine the hierarchy (e.g. `Feature > Epic > Story > Ticket`).
-- **Multiple views** → Tree, table, ASCII, logs — whatever fits your brain.  
+- **Hierarchical workflows** - Model complex projects, not just checklists.
+- **Diff-based undo/redo** - Rare in TUIs, a game-changer for experimentation.
+- **Autosave & recovery** - Kill the terminal? Pick up right where you left off.
+- **Export anywhere** - JSON, CSV, PDF - your data, your rules.
+- **Schema freedom** - Redefine the hierarchy (e.g. `Feature > Epic > Story > Ticket`).
+- **Multiple views** - Tree, table, ASCII, logs - whatever fits your brain.  
 
 ---
 
@@ -32,13 +32,13 @@ Key ideas:
 
 ## 🧩 Features at a glance
 
-- 🔹 **Command Registry** – every command declaratively defined, consistent & extendable.  
-- 🔹 **Layered logging system** – INFO, WARN, ERROR, HELP, DEBUG, SUCCESS.  
-- 🔹 **Dual log channels** – system/runtime vs presenter/visual.  
-- 🔹 **Command history navigation** – arrow keys recall the last 50 commands.  
-- 🔹 **Interactive confirmations** – no accidental nukes of your data.  
-- 🔹 **Autosave toggle** – configure safety vs control.  
-- 🔹 **Configurable themes & header info** – because style matters, even in CLI.  
+- 🔹 **Command Registry** - every command declaratively defined, consistent & extendable.  
+- 🔹 **Layered logging system** - INFO, WARN, ERROR, HELP, DEBUG, SUCCESS.  
+- 🔹 **Dual log channels** - system/runtime vs presenter/visual.  
+- 🔹 **Command history navigation** - arrow keys recall the last 50 commands.  
+- 🔹 **Interactive confirmations** - no accidental nukes of your data.  
+- 🔹 **Autosave toggle** - configure safety vs control.  
+- 🔹 **Configurable themes & header info** - because style matters, even in CLI.  
 
 ---
 
@@ -46,12 +46,12 @@ Key ideas:
 
 We’re just getting started. Upcoming ideas:
 
-- **Advanced Search** → filters, regex, fuzzy matching, saved queries.  
-- **Profiles** → multiple personal/project spaces, custom settings + themes.  
-- **Dashboard & Stats** → completion %, summaries, progress visuals.  
-- **Enhanced TUI** → dedicated project view, menu system, integrated changelog.  
-- **Themes & customization** → dark/light/high-contrast, custom color schemes.  
-- **Plugin system** → extend with integrations, custom commands, automations.  
+- **Advanced Search** - filters, regex, fuzzy matching, saved queries.  
+- **Profiles** - multiple personal/project spaces, custom settings + themes.  
+- **Dashboard & Stats** - completion %, summaries, progress visuals.  
+- **Enhanced TUI** - dedicated project view, menu system, integrated changelog.  
+- **Themes & customization** - dark/light/high-contrast, custom color schemes.  
+- **Plugin system** - extend with integrations, custom commands, automations.  
 
 ---
 
@@ -100,12 +100,15 @@ export --format pdf  # export to PDF
 
 ## 📜 Latest Changes
 
-### v0.1.0a9 (2025-09-07)
-- New config subsystem (easier, cleaner management).
-- Two-step context initialization.
-- Added `import` command for Glyph.Flow data files (JSON) with 'replace', 'append' and 'merge' modes.
-- Customizable `export` command with CSV, PDF, JSON output.
-- More command aliases.
+### v0.1.0 (2025-09-12)
+- Added `bigsample` command to expand testing capabilities.
+- Added `test` command for automatically test file integrity, configuration, and command functionality.
+- Added new simple themes and a Hotkey (T) to change between them.
+- Added `theme` key to config so that the last used theme is saved after exiting the app.
+- Introduced **footer help bar** showing available hotkeys.
+- Fixed PDF export issue with CJK/Cyrillic characters.
+- Fixed the issue where the contents of the logs were restored when configuring panels after running the "clear" command.
+- Minor fixes and improvements in command handlers and docs. It becomes highlighted when the hotkeys are active (outside input field).
 
 *(Full changelog in [changelog](CHANGELOG.md)).*
 
@@ -113,8 +116,9 @@ export --format pdf  # export to PDF
 
 ## 🛠 Status
 
-Glyph.Flow is still **alpha software**.
-Expect rough edges, but the foundations are here — and it’s evolving fast.
+Glyph.Flow has reached its **0.1.0 release**, the first public milestone.  
+It’s still early-stage software: features are evolving quickly and some parts may be incomplete or unstable.  
+Expect changes, new additions, and the occasional bug, but the core foundations are in place.
 
 Star ⭐ the repo if you like where it’s heading.
 **Feedback & contributions are always welcome.**

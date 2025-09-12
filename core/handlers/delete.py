@@ -72,6 +72,7 @@ def delete_handler(ctx, *, id: Optional[str] = None) -> CommandResult:
         "index": idx
     }]
     diff = Diff(forward=forward, backward=backward)
+    ctx.app.refresh_data_info_box()
 
     return CommandResult(
         code="deleted_child",

@@ -1,11 +1,13 @@
+
+
 Screen {
     align: center middle;
-    background: #130303ff;
+    background: $background;
 }
 
 #TUI {
-    width: 97%;
-    height: 97%;
+    width: 100%;
+    height: 100%;
     align: center middle;
     content-align: center middle;
     background: transparent;
@@ -19,9 +21,9 @@ RichLog {
     border: none;
     background: $panel 10%;
     scrollbar-size: 0 1;
-    scrollbar-color: #851b1bff; 
-    scrollbar-color-hover: #6E2121;
-    scrollbar-color-active: #6E2121;
+    scrollbar-color: $primary; 
+    scrollbar-color-hover: $secondary;
+    scrollbar-color-active: $secondary;
 }
 
 Input {
@@ -37,14 +39,14 @@ Vertical {
     content-align: center middle;
     height: 100%;
     width: 100%;
-    border: round #851b1bff;
+    border: round $primary;
     margin-left: 1;
 }
 
 #header {
     width: 100%;
     height: 9;
-    background: #851b1bff;
+    background: $primary;
     padding: 0;
     margin: 0;
     border: none;
@@ -56,7 +58,7 @@ Vertical {
 #gf-logo {
     width: 50%;
     height: 9;
-    background: #851b1bff;
+    background: $primary;
     padding: 0;
     margin: 0;
     border: none;
@@ -65,12 +67,11 @@ Vertical {
     text-align: center;
 }
 
-
 #info-box {
     width: 25%;
     height: 9;
-    background: #851b1bff;
-    color: #000000ff;
+    background: $primary;
+    color: #000000;
     text-style: bold;
     padding: 1;
     margin: 0;
@@ -80,15 +81,30 @@ Vertical {
     text-align: center;
 }
 
+#data-info-box {
+    width: 25%;
+    height: 9;
+    background: $primary;
+    color: #000000;
+    text-style: bold;
+    padding: 1;
+    margin: 0;
+    border: none;
+    align: right bottom;
+    padding-right: 2;
+    content-align: center top;
+    text-align: center;
+}
+
 InfoLabel {
-    background: #851b1bff;
-    color: #1f1f1fff;
+    background: $primary;
+    color: #1f1f1f;
     text-style: bold;
 }
 
 Rule {
-    background: #130303ff;
-    color: #851b1bff;
+    background: #130303;
+    color: $primary;
     margin: 0;
     padding: 0;
 }
@@ -100,12 +116,12 @@ Rule {
     height: 1fr;
     padding: 0;
     margin: 0;
-    border: round #851b1bff;
+    border: round $primary;
     background: $panel 10%;
     scrollbar-size: 0 1;
-    scrollbar-color: #851b1bff;
-    scrollbar-color-hover: #6E2121;
-    scrollbar-color-active: #6E2121;
+    scrollbar-color: $primary;
+    scrollbar-color-hover: $secondary;
+    scrollbar-color-active: $secondary;
 }
 
 #output-log {
@@ -114,10 +130,13 @@ Rule {
     height: 1fr;
     padding: 1;
     margin: 0;
-    border: round #851b1bff;
+    border: round $primary;
     background: $panel 10%;
     scrollbar-size: 0 1;
-    scrollbar-color: #851b1bff;
-    scrollbar-color-hover: #6E2121;
-    scrollbar-color-active: #6E2121;
+    scrollbar-color: $primary;
+    scrollbar-color-hover: $secondary;
+    scrollbar-color-active: $secondary;
 }
+
+#footer-container {height: auto; color: #d1d1d1ff;}
+#footer-container:focus-within { color: gray; }

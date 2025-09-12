@@ -8,11 +8,36 @@
 ### ✨ Added
 - Planned support for advanced `search` filters (by type, regex, tags, and date ranges).
 - Profiles for switching between personal workspaces with separate settings and project trees.
-- Optional themes (light, dark, high-contrast) with user-defined color customization.
+- Opportunity to create your own themes.
 
 ### 🔧 Improved
 - Refinements to the undo/redo system (configurable history depth, better memory handling).
 - More descriptive error and help messages for commands.
+
+---
+
+## [v0.1.0](../../releases/tag/v0.1.0) – 2025-09-12
+*The first non-alpha release, which introduces automated testing, introduces simpler theme management, and creates a stable foundation for future development.*
+
+### ✨ Added
+- Added `bigsample` command to expand testing capabilities.
+- Added `test` command for automatically test file integrity, configuration, and command functionality.
+- Added new simple themes (crimson, arctic, desert) and a Hotkey (T) to change between them.
+- Added a `data info field` to the right of the header with the number of all, completed and ongoing projects.
+- Added `theme` key to config so that the last used theme is saved after exiting the app.
+- Introduced **footer help bar** showing available hotkeys. It becomes highlighted when the hotkeys are active (outside input field).
+
+### 🔧 Improved
+- Minor improvements in command handlers.
+- Updated internal messages.
+
+### 🐛 Fixed
+- Fixed PDF export issue with CJK/Cyrillic characters.
+- Fixed the issue where the contents of the logs were restored when configuring panels after running the "clear" command.
+
+### 🚧 Known Limitations
+- Panel animations may flicker on some terminals under Windows.
+- Theme management is currently in a limited state, as it will become a full-fledged feature as TUI is developed.
 
 ---
 
@@ -30,7 +55,7 @@
 - Added requirements.txt for easier install.
 - Fixed the error on startup without a data folder.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - Panel animations may flicker on some terminals under Windows.
 
 ---
@@ -46,7 +71,7 @@
 - Glyph.Flow pixelart for the header now loaded without preparing it at startup.
 - Minor command handler improvements.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - Import/export of node trees missing.
 - Panel animations may flicker on some terminals under Windows.
 
@@ -58,7 +83,7 @@
 ### 🔧 Improved/Fixed
 - Fixed the error on startup without a data file.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - Undo/redo not yet implemented.
 - Manual command input only – no TUI or keybindings yet
 - Import/export of node trees missing.
@@ -86,7 +111,7 @@
 - Added more conditional check to 'create_handler' to avoid unexpected errors.
 - Solved node ID creation issue: IDs now automatically rearrange when a node is deleted.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - Undo/redo not yet implemented.
 - Manual command input only – no TUI or keybindings yet
 - Import/export of node trees missing.
@@ -112,7 +137,7 @@
 - Command addition now requires only a registry entry + handler function.
 - `clearall` command refactor: no parameters, delete all data.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - No undo/redo system.
 - Manual command input only – no TUI or keybindings yet.
 - No export/import feature.
@@ -133,7 +158,7 @@
 - More efficient internal and external log management.
 - Minor backend changes, preparing for complete separation from the frontend.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - No undo/redo system.
 - Manual command input only – no TUI or keybindings yet.
 - No export/import feature.
@@ -152,7 +177,7 @@
 - Startup message now displays version number + autosave status.
 - All log outputs now use consistent formatting.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - No undo/redo system.
 - No system message buffer/logging.
 - Manual command input only – no TUI or keybindings yet.
@@ -173,7 +198,7 @@
 - Help text now loaded from external file for easier editing.
 - Unified argument parsing for new commands.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - No undo/redo system.
 - No system message buffer/logging.
 - Manual command input only – no TUI or keybindings yet.
@@ -195,7 +220,7 @@
 - Root ID counter now adjusts after loading data.
 - Improved toggle logic to respect manual states.
 
-### 🐛 Known Limitations
+### 🚧 Known Limitations
 - No `edit`, `move`, or `find` support yet.
 - No undo/redo system.
 - No logging system.

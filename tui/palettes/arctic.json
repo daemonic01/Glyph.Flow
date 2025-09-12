@@ -1,0 +1,21 @@
+{
+  "name": "glyph-arctic",
+  "dark": true,
+  "colors": {
+    "primary":   "#4a8784",
+    "secondary": "#366b68",
+    "accent":    "#F46036",
+    "foreground":"#EAEAEA",
+    "background":"#0F0F0F",
+    "surface":   "#1A1A1A",
+    "panel":     "#151515",
+    "success":   "#2ECC71",
+    "warning":   "#E67E22",
+    "error":     "#E74C3C",
+    "pina": "#333333"
+  },
+  "variables": {
+    "brand": "#D7263D",
+    "keyline": "#333333"
+  }
+}

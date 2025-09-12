@@ -5,6 +5,7 @@
 [bold white]Available Shortcuts (outside the input field):
 [bold]  'q'           Quit the app.
 [bold]  'a'           Resize display panels: 1:1 / 3:7. For wider outputs, like 'table'.
+[bold]  't'           Switch themes between 'crimson', 'arctic' and 'desert'.
 
 
 [bold white]Available Commands:
@@ -73,6 +74,7 @@
 [bold]💾 File I/O
 [bold white]  sample       Generate a sample node tree
 [dim]    Aliases: "demo"
+[bold white]  bigsample       Generate a big (11111 node) test sample node tree                 * NEW *
 [bold white]  save         Save project tree manually.
 [dim]    Aliases: "s"
 
@@ -80,16 +82,17 @@
 [bold]🧹 Bulk Operations
 [bold white]  clearall
     Clear all nodes (requires confirmation)
-[bold white]  import [--file ...] [--mode ...]                                                  * NEW *
+[bold white]  import [--file ...] [--mode ...]
 [dim]    Aliases: "imp"
     Imports project tree from a JSON file with three modes. Requires confirmation.
-[bold white]  export [--format] [--path] [--scope] [--columns] [--sort] [--no-completed]        * NEW *
+[bold white]  export [--format] [--path] [--scope] [--columns] [--sort] [--no-completed]
 [dim]    Aliases: "ex", "exp", "output"
     Exports project tree to CSV, PDF or JSON file.
 
 [bold]🧪 Misc
-[bold white]  help         Show this help message
+[bold white]  help                              Show this help message
 [dim]    Aliases: "?"
+[bold white]  test <all|files|config|cmd>       Test file integrity, config file, command functionality or both. It creates report files in tests/reports.        * NEW *
 
 [bold]⚙️ Config
 [dim]    Aliases: "cfg"
