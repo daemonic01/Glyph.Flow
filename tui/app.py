@@ -18,6 +18,9 @@ from .gf_art import GlyphArt
 from core.config.config_vault import ConfigVault
 from core.glyph_nexus import GlyphNexus
 from pathlib import Path
+import os, psutil
+import threading, time
+
 
 class GlyphRichLog(RichLog):
     def __init__(self, *args, buffer_cap=100, **kwargs):
@@ -75,6 +78,8 @@ class GlyphApp(App):
         self.version_label = Label("", classes="InfoLabel")
         self.autosave_label = Label("", classes="InfoLabel")
         self.logging_label = Label("", classes="InfoLabel")
+        self.cpu_usage_label = Label("", classes="InfoLabel")
+        self.memory_use_label = Label("", classes="InfoLabel")
 
         # prepare project info box labels
         self.project_count_label = Label("", classes="DataInfoLabel")
@@ -85,6 +90,8 @@ class GlyphApp(App):
                 self.version_label,
                 self.autosave_label,
                 self.logging_label,
+                self.cpu_usage_label,
+                self.memory_use_label,
                 id="info-box"
             ),
             GlyphArt(image_map, default_theme=default_theme, art_size=(100, 18)),
@@ -117,6 +124,9 @@ class GlyphApp(App):
     def on_mount(self):
         # --- CONFIG ---
         self.ctx = GlyphNexus()
+        pid = os.getpid()
+        process = psutil.Process(pid)
+        threading.Thread(target=self.monitor, args=(process,), daemon=True).start()
 
         # --- SERVICES ---
         messages_path = self.ctx.config.get("paths.messages", "loc/en/messages.json", str)
@@ -247,10 +257,15 @@ class GlyphApp(App):
 
             self.output_focus = False
 
+
+
     def refresh_header_from_config(self) -> None:
         self.version_label.update(f"Active version: {self.ctx.config.get('version', 'unknown')}")
         self.autosave_label.update(f"Autosave: {'ON' if self.ctx.config.get('autosave') else 'OFF'}")
         self.logging_label.update(f"Logging: {'ON' if self.ctx.config.get('logging') else 'OFF'}")
+        
+
+
 
     def refresh_data_info_box(self):
         self.project_count_label.update(f"Active projects: {len(self.ctx.app.nodes)}")
@@ -284,3 +299,12 @@ class GlyphApp(App):
         )
         app.register_theme(theme)
         app.theme = theme.name 
+
+
+    def monitor(self, proc):
+        while True:
+            memory_use = proc.memory_info().rss / (1024 ** 2)
+            cpu_use = proc.cpu_percent(interval=None)
+            self.cpu_usage_label.update(f"\nCPU: {cpu_use:.2f}%")
+            self.memory_use_label.update(f"Memory: {memory_use:.2f} MB")
+            time.sleep(1)

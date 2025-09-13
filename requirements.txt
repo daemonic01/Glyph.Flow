@@ -3,3 +3,4 @@ reportlab==4.4.3
 rich==14.1.0
 rich_pixels==3.0.1
 textual==6.1.0
+psutil==7.0.0

@@ -1,0 +1,158 @@
+=== FILES ===
+[SUCCESS] assets/help.txt
+[SUCCESS] assets/images/gf_art.png
+[SUCCESS] config.json
+[SUCCESS] core/command_history.py
+[SUCCESS] core/config/config_vault.py
+[SUCCESS] core/controllers/command_core.py
+[SUCCESS] core/controllers/command_factory.py
+[SUCCESS] core/controllers/command_result.py
+[SUCCESS] core/controllers/registry.py
+[SUCCESS] core/controllers/undo_redo.py
+[SUCCESS] core/data_io.py
+[SUCCESS] core/errors/command_errors.py
+[SUCCESS] core/glyph_nexus.py
+[SUCCESS] core/handlers/bigsample.py
+[SUCCESS] core/handlers/clearall.py
+[SUCCESS] core/handlers/create.py
+[SUCCESS] core/handlers/delete.py
+[SUCCESS] core/handlers/edit.py
+[SUCCESS] core/handlers/move.py
+[SUCCESS] core/handlers/sample.py
+[SUCCESS] core/handlers/search.py
+[SUCCESS] core/handlers/toggle.py
+[SUCCESS] core/log.py
+[SUCCESS] core/message_styler.py
+[SUCCESS] core/node.py
+[SUCCESS] core/presenters/ascii.py
+[SUCCESS] core/presenters/help.py
+[SUCCESS] core/presenters/ls.py
+[SUCCESS] core/presenters/search_table.py
+[SUCCESS] core/presenters/table.py
+[SUCCESS] core/presenters/tree.py
+[SUCCESS] core/services/clear_terminal.py
+[SUCCESS] core/services/config.py
+[SUCCESS] core/services/confirm.py
+[SUCCESS] core/services/export.py
+[SUCCESS] core/services/import.py
+[SUCCESS] core/services/quit.py
+[SUCCESS] core/services/save.py
+[SUCCESS] core/services/schema.py
+[SUCCESS] core/services/test.py
+[SUCCESS] core/services/undo_redo.py
+[SUCCESS] core/utils.py
+[SUCCESS] loc/en/messages.json
+[SUCCESS] main.py
+[SUCCESS] tests/cmd_test_data.json
+[SUCCESS] tests/cmd_test_no_data.json
+[SUCCESS] tests/config.txt
+[SUCCESS] tests/files.txt
+[SUCCESS] tests/test_data.json
+[SUCCESS] tests/wrong_test_data.csv
+[SUCCESS] tui/app.py
+[SUCCESS] tui/app.tcss
+[SUCCESS] tui/gf_art.py
+[SUCCESS] tui/palettes/crimson.json
+[SUCCESS] tui/palettes/arctic.json
+[SUCCESS] tui/palettes/desert.json
+-> total 56 | ok 56 | time 0.0008s
+
+=== CONFIG ===
+[SUCCESS] config file exists: D:\CODING\PY\DEV\GlyphFlow\config.json
+[SUCCESS] all required config keys present
+-> time 0.0001s
+
+=== COMMANDS ===
+
+[RUN] sample -> code=success (0.0007s)
+[green][SUCCESS] help -> code=success expect=success (0.0112s)
+[green][SUCCESS] ls -> code=success expect=success (0.0007s)
+[green][SUCCESS] tree -> code=success expect=success (0.0014s)
+[green][SUCCESS] ascii -> code=success expect=success (0.0013s)
+[green][SUCCESS] table -> code=success expect=success (0.0031s)
+[green][SUCCESS] clear -> code=success expect=success (0.0004s)
+[green][SUCCESS] config FAKE_KEY on -> code=unknown_key expect=unknown_key (0.0003s)
+[green][SUCCESS] config autosave maybe -> code=invalid_value expect=invalid_value (0.0000s)
+[green][SUCCESS] config logging on -> code=no_change expect=no_change (0.0000s)
+[green][SUCCESS] config logging off -> code=set_success expect=set_success (0.0010s)
+[green][SUCCESS] config logging on -> code=set_success expect=set_success (0.0007s)
+[green][SUCCESS] export --format csv --path ./tests/exports/test_exp.json -> code=success expect=success (0.0792s)
+[green][SUCCESS] export --format invalidformat -> code=invalid_format expect=invalid_format (0.0000s)
+[green][SUCCESS] import --file G:/data/nodes.json -> code=file_missing expect=file_missing (0.0005s)
+[green][SUCCESS] import --file ./tests/test_data.json --mode invalidmode -> code=invalid_mode expect=invalid_mode (0.0001s)
+[green][SUCCESS] import --file ./tests/wrong_test_data.csv --mode replace -> code=parse_error expect=parse_error (0.0002s)
+[green][SUCCESS] import --file ./tests/test_data.json --mode replace -> code=replaced expect=replaced (0.0006s)
+[green][SUCCESS] import --file ./tests/test_data.json --mode append -> code=appended expect=appended (0.0002s)
+[green][SUCCESS] import --file ./tests/test_data.json --mode merge -> code=merged expect=merged (0.0002s)
+[green][SUCCESS] save -> code=manual_save_completed expect=manual_save_completed (0.0006s)
+[green][SUCCESS] schema A B C -> code=length_mismatch expect=length_mismatch (0.0000s)
+[green][SUCCESS] schema A B C D -> code=switch_success expect=switch_success (0.0000s)
+[green][SUCCESS] schema --default -> code=switch_default_success expect=switch_default_success (0.0000s)
+[green][SUCCESS] create Subtask TempSubtask --parent 01.01.01 -> code=success expect=success (0.0004s)
+[green][SUCCESS] create Subtask TempSubSubtask --parent 01.01.01.01 -> code=tree_level_error expect=tree_level_error (0.0000s)
+[green][SUCCESS] create Project TempProject --deadline 2030-10-10 -> code=success expect=success (0.0016s)
+[green][SUCCESS] undo -> code=success expect=success (0.0003s)
+[green][SUCCESS] redo -> code=success expect=success (0.0000s)
+[green][SUCCESS] edit 09 --name NewName -> code=not_found expect=not_found (0.0003s)
+[green][SUCCESS] edit 01 --name NewName -> code=edit_done expect=edit_done (0.0000s)
+[green][SUCCESS] edit 01 --deadline 2000-10-10 -> code=past_date_error expect=past_date_error (0.0000s)
+[green][SUCCESS] edit 01 --name NewName -> code=edit_no_change expect=edit_no_change (0.0000s)
+[green][SUCCESS] move 01 02 -> code=move_root_error expect=move_root_error (0.0003s)
+[green][SUCCESS] move 01.09 02 -> code=node_not_found expect=node_not_found (0.0000s)
+[green][SUCCESS] move 01.01 09 -> code=target_parent_not_found expect=target_parent_not_found (0.0000s)
+[green][SUCCESS] move 01.01 01 -> code=already_there expect=already_there (0.0000s)
+[green][SUCCESS] move 01.01.01 01 -> code=type_error expect=type_error (0.0000s)
+[green][SUCCESS] move 01.01 02 -> code=move_success expect=move_success (0.0000s)
+[green][SUCCESS] delete 01.01.01 -> code=deleted_child expect=deleted_child (0.0005s)
+[green][SUCCESS] delete 09 -> code=not_found expect=not_found (0.0000s)
+[green][SUCCESS] delete 01 -> code=deleted_root expect=deleted_root (0.0001s)
+[green][SUCCESS] search ZZZZZZZZ -> code=search_no_matches expect=search_no_matches (0.0004s)
+[green][SUCCESS] search A -> code=search_results expect=search_results (0.0000s)
+[green][SUCCESS] search id 01 -> code=search_results expect=search_results (0.0000s)
+[green][SUCCESS] bigsample -> code=success expect=success (0.0383s)
+[RUN] clearall -> code=clear_done (0.0005s)
+[green][SUCCESS] help -> code=success expect=success (0.0101s)
+[green][SUCCESS] ls -> code=no_data_loaded expect=no_data_loaded (0.0000s)
+[green][SUCCESS] tree -> code=no_data_loaded expect=no_data_loaded (0.0000s)
+[green][SUCCESS] ascii -> code=no_data_loaded expect=no_data_loaded (0.0000s)
+[green][SUCCESS] table -> code=no_data_loaded expect=no_data_loaded (0.0000s)
+[green][SUCCESS] clear -> code=success expect=success (0.0001s)
+[green][SUCCESS] config FAKE_KEY on -> code=unknown_key expect=unknown_key (0.0000s)
+[green][SUCCESS] config autosave maybe -> code=invalid_value expect=invalid_value (0.0000s)
+[green][SUCCESS] config logging on -> code=no_change expect=no_change (0.0000s)
+[green][SUCCESS] config logging off -> code=set_success expect=set_success (0.0009s)
+[green][SUCCESS] config logging on -> code=set_success expect=set_success (0.0010s)
+[green][SUCCESS] export --format csv -> code=no_data_loaded expect=no_data_loaded (0.0000s)
+[green][SUCCESS] import --file G:/data/nodes.json -> code=file_missing expect=file_missing (0.0001s)
+[green][SUCCESS] import --file ./tests/test_data.json --mode invalidmode -> code=invalid_mode expect=invalid_mode (0.0000s)
+[green][SUCCESS] import --file ./tests/wrong_test_data.csv --mode replace -> code=parse_error expect=parse_error (0.0001s)
+[green][SUCCESS] import --file ./tests/test_data.json --mode replace -> code=replaced expect=replaced (0.0002s)
+[green][SUCCESS] import --file ./tests/test_data.json --mode append -> code=appended expect=appended (0.0002s)
+[green][SUCCESS] import --file ./tests/test_data.json --mode merge -> code=merged expect=merged (0.0001s)
+[green][SUCCESS] clearall -> code=file_not_found expect=file_not_found (0.0000s)
+[green][SUCCESS] save -> code=manual_save_completed expect=manual_save_completed (0.0002s)
+[green][SUCCESS] schema A B C D -> code=switch_success expect=switch_success (0.0000s)
+[green][SUCCESS] schema --default -> code=switch_default_success expect=switch_default_success (0.0000s)
+[green][SUCCESS] create Nothing TempProject -> code=root_type_error expect=root_type_error (0.0000s)
+[green][SUCCESS] create Phase TempPhase --parent 01 -> code=parent_not_found_error expect=parent_not_found_error (0.0000s)
+[green][SUCCESS] create Project TempProject --deadline 2030-10-10 -> code=success expect=success (0.0001s)
+[green][SUCCESS] create Phase TempPhase2 --deadline 2000-10-10 --parent 01 -> code=past_date_error expect=past_date_error (0.0000s)
+[green][SUCCESS] create Phase TempPhase2 --deadline 2031-10-10 --parent 01 -> code=deadline_too_early expect=deadline_too_early (0.0000s)
+[green][SUCCESS] undo -> code=success expect=success (0.0000s)
+[green][SUCCESS] redo -> code=success expect=success (0.0000s)
+[green][SUCCESS] clearall -> code=clear_done expect=clear_done (0.0001s)
+[green][SUCCESS] delete 01 -> code=no_data_loaded expect=no_data_loaded (0.0000s)
+[green][SUCCESS] edit 01 --name X -> code=no_data_loaded expect=no_data_loaded (0.0000s)
+[green][SUCCESS] toggle 01 -> code=no_data_loaded expect=no_data_loaded (0.0003s)
+[green][SUCCESS] move 01 01.02 -> code=no_data_loaded expect=no_data_loaded (0.0000s)
+[green][SUCCESS] search anything -> code=no_data expect=no_data (0.0000s)
+-> commands 80/80 ok | time 0.1598s
+
+[white]=== SUMMARY ===
+Tested: files, config, cmd
+Files: 56/56 in 0.0008s 
+Config: 12/12 in 0.0001s 
+Commands: 80/80 in 0.1598s 
+Total = 0.1607s
+
+Report file saved to tests/reports.

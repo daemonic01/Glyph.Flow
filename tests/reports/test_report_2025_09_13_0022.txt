@@ -1,0 +1,12 @@
+
+=== CONFIG ===
+[SUCCESS] config file exists: D:\CODING\PY\DEV\GlyphFlow\config.json
+[SUCCESS] all required config keys present
+-> time 0.0002s
+
+[white]=== SUMMARY ===
+Tested: config
+Config: 12/12 in 0.0002s 
+Total = 0.0002s
+
+Report file saved to tests/reports.
