@@ -86,3 +86,4 @@ log/
 data/*
 temp/*
 export/
+tests/reports
