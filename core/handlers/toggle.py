@@ -42,6 +42,10 @@ def toggle_handler(ctx, *, id: Optional[str] = None) -> CommandResult:
         forward_ops.append({"op": "toggle", "node_id": n.id, "field": "completed", "value": bool(new_status)})
         backward_ops.append({"op": "toggle", "node_id": n.id, "field": "completed", "value": before})
 
+    anc_fwd, anc_bwd = _up_sync_after_toggle(node, new_status)
+    forward_ops.extend(anc_fwd)
+    backward_ops.extend(anc_bwd)
+    
     name = getattr(node, "name", id)
     diff = Diff(forward=forward_ops, backward=backward_ops)
     ctx.app.refresh_data_info_box()
@@ -116,3 +120,36 @@ def _gather_subtree(node) -> list:
         out.append(cur)
         stack.extend(getattr(cur, "children", []) or [])
     return out
+
+
+def _up_sync_after_toggle(node, toggled_to: bool) -> Tuple[list, list]:
+    """
+    Walk up via .parent and keep parents consistent:
+      - if toggled_to == False: force all ancestors to completed=False
+      - if toggled_to == True: parent.completed = all(child.completed for child in parent.children)
+    Returns (forward_ops, backward_ops) so undo/redo remains correct.
+    """
+    fwd, bwd = [], []
+
+    cur = getattr(node, "parent", None)
+    if toggled_to is False:
+        # any "not completed" child means parent can't be completed
+        while cur is not None:
+            before = bool(getattr(cur, "completed", False))
+            if before:  # only record when it actually flips
+                setattr(cur, "completed", False)
+                fwd.append({"op": "toggle", "node_id": cur.id, "field": "completed", "value": False})
+                bwd.append({"op": "toggle", "node_id": cur.id, "field": "completed", "value": before})
+            cur = getattr(cur, "parent", None)
+    else:
+        # each ancestor is completed if ALL its direct children are completed
+        while cur is not None:
+            should = all(bool(getattr(ch, "completed", False)) for ch in (getattr(cur, "children", []) or []))
+            before = bool(getattr(cur, "completed", False))
+            if before != should:
+                setattr(cur, "completed", should)
+                fwd.append({"op": "toggle", "node_id": cur.id, "field": "completed", "value": should})
+                bwd.append({"op": "toggle", "node_id": cur.id, "field": "completed", "value": before})
+            cur = getattr(cur, "parent", None)
+
+    return fwd, bwd

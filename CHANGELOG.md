@@ -16,6 +16,15 @@
 
 ---
 
+## [v0.1.1](../../releases/tag/v0.1.1) – 2025-09-14
+
+### 🔧 Improved
+- Switching a node structure now also has an upward effect. When all internal nodes are completed, the one above them will also be ready.
+
+### 🐛 Fixed
+- The `test` command now runs on a sandbox data file, so it doesn't affect project structures that have already been created.
+
+
 ## [v0.1.0](../../releases/tag/v0.1.0) – 2025-09-12
 *The first non-alpha release, which introduces automated testing, introduces simpler theme management, and creates a stable foundation for future development.*
 

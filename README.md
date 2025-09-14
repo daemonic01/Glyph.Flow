@@ -102,15 +102,9 @@ export --format pdf  # export to PDF
 
 ## 📜 Latest Changes
 
-### v0.1.0 (2025-09-12)
-- Added `bigsample` command to expand testing capabilities.
-- Added `test` command for automatically test file integrity, configuration, and command functionality.
-- Added new simple themes and a Hotkey (T) to change between them.
-- Added `theme` key to config so that the last used theme is saved after exiting the app.
-- Introduced **footer help bar** showing available hotkeys.
-- Fixed PDF export issue with CJK/Cyrillic characters.
-- Fixed the issue where the contents of the logs were restored when configuring panels after running the "clear" command.
-- Minor fixes and improvements in command handlers and docs. It becomes highlighted when the hotkeys are active (outside input field).
+### v0.1.1 (2025-09-14)
+- Switching a node structure now also has an upward effect. When all internal nodes are completed, the one above them will also be ready.
+- The `test` command now runs on a sandbox data file, so it doesn't affect project structures that have already been created.
 
 *(Full changelog in [changelog](CHANGELOG.md)).*
 

@@ -3,6 +3,8 @@ from pathlib import Path
 from datetime import datetime
 from core.controllers.command_result import CommandResult
 from core.controllers.command_factory import summon
+from core.data_io import save_node_tree
+import copy
 
 _TEST_CMD_NAMES = {"test", "t", "qa", "selftest"}
 
@@ -24,6 +26,28 @@ def test_handler(ctx, *, target: str = "all") -> CommandResult:
     base_dir = Path(getattr(ctx, "base_dir", Path.cwd()))
     start_all = time.perf_counter()
     sections = _normalize_target(target)
+
+     # flags & paths
+    autosave_prev = bool(ctx.config.get("autosave", False))
+    data_path_rel = ctx.config.get("paths.data")
+    data_path_abs = (ctx.base_dir / data_path_rel) if data_path_rel else None
+
+    # raw on-disk backup
+    file_backup = None
+    if data_path_abs and data_path_abs.exists():
+        file_backup = data_path_abs.read_bytes()
+
+    # in-memory deep copy
+    temp_backup = copy.deepcopy(ctx.app.nodes)
+
+    # sandbox: redirect the data path to a temp location and turn off autosave
+    temp_dir = ctx.base_dir / "tests/tmp"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    temp_data_path = temp_dir / "test_data.json"
+    if temp_data_path.exists():
+        temp_data_path.unlink()
+    ctx.config.edit("paths.data", str(temp_data_path))
+    ctx.config.edit("autosave", False)
 
     ctx.config.edit("assume_yes", True)
     ctx.config.edit("test_mode", True)
@@ -71,21 +95,48 @@ def test_handler(ctx, *, target: str = "all") -> CommandResult:
         return CommandResult(code=code, params={"error": e}, outcome=overall_ok)
     finally:
         ctx.app.refresh_data_info_box()
-        # Reset config
+        # reset config
+        ctx.config.edit("paths.data", str(data_path_rel) if data_path_rel else None)
+        ctx.config.edit("autosave", autosave_prev)
         ctx.config.edit("assume_yes", False)
         ctx.config.edit("test_mode", False)
         ctx.config.save()
-        # Delete test exports if they exist
+        # delete test exports if they exist
         if os.path.exists(ctx.base_dir / "tests/exports"):
             shutil.rmtree(ctx.base_dir / "tests/exports")
-        # Export report
+        # export report
         out_dir = Path(getattr(ctx, "base_dir", ".")) / "tests/reports"
         out_dir.mkdir(parents=True, exist_ok=True)
-        stamp = datetime.now().strftime("%Y_%m_%d_%H%M")   # pl. 2025_09_12_1855
+        stamp = datetime.now().strftime("%Y_%m_%d_%H%M")
         report_path = out_dir / f"test_report_{stamp}.txt"
         report_path.write_text("\n".join(report), encoding="utf-8")
 
+        ctx.app.nodes = temp_backup
 
+        # restore original data path
+        if data_path_abs:
+            data_path_abs.parent.mkdir(parents=True, exist_ok=True)
+            if file_backup is None:
+                try:
+                    if data_path_abs.exists():
+                        data_path_abs.unlink()
+                except Exception:
+                    pass
+            else:
+                data_path_abs.write_bytes(file_backup)
+
+        save_node_tree(ctx)
+
+        ctx.app.refresh_data_info_box()
+
+        # 8) delete temp sandbox path
+        try:
+            if temp_data_path.exists():
+                temp_data_path.unlink()
+            if temp_dir.exists():
+                temp_dir.rmdir()
+        except Exception:
+            pass
 
 
 

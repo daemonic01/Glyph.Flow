@@ -1,5 +1,5 @@
 {
-    "version": "0.1.0",
+    "version": "0.1.1",
     "theme": "arctic",
     "paths": {
         "data": "data/node_data.json",
@@ -36,7 +36,7 @@
             "backup_count": 5
         }
     },
-    "autosave": true,
+    "autosave": false,
     "assume_yes": false,
     "command_history_maxlen": 50,
     "undo_redo_limit": 50
